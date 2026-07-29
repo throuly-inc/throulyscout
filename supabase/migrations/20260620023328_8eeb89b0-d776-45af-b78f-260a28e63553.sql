@@ -1,0 +1,1 @@
+CREATE POLICY "Block direct client reads of sellers" ON public.sellers FOR SELECT TO anon, authenticated USING (false);

@@ -1,0 +1,1 @@
+DELETE FROM public.saved_scenarios WHERE id IN ('cbe1206b-22a1-46fc-b365-7a4a7a3c3cf7','86321cf0-d444-4c69-8f4c-5e3941fb6b1f');
