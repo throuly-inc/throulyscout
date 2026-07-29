@@ -154,8 +154,8 @@ serve(async (req) => {
     logStep("Scraped content length", { length: markdown.length });
 
     // Step 2: Use AI to extract property data
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableApiKey) {
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+    if (!geminiApiKey) {
       return new Response(
         JSON.stringify({ success: false, error: 'AI service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -185,14 +185,14 @@ ${markdown.substring(0, 8000)}`;
 
     logStep("Extracting property data with AI");
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
+        'Authorization': `Bearer ${geminiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [
           { role: 'system', content: 'You are a precise data extraction assistant. Always respond with valid JSON only.' },
           { role: 'user', content: extractionPrompt }
