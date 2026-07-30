@@ -20,7 +20,7 @@ export function AssistancePrograms({ state, city, propertyPrice, income }: Assis
     if (!state) return;
     setLoading(true);
     try {
-      const { data: result, error } = await supabase.functions.invoke('get-assistance-programs', {
+      const { data: result, error } = await supabase.functions.invoke('throulyscout-get-assistance-programs', {
         body: { state, city, propertyPrice, income, isFirstTimeBuyer: true }
       });
       if (!error && result.success) {

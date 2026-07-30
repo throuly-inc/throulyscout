@@ -5,6 +5,7 @@ import { PropertyAnalysisGateModal } from "@/components/premium/PropertyAnalysis
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { SEO } from "@/components/seo/SEO";
 import { Link } from "react-router-dom";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 const PROPERTY_URL_PATTERNS = [
   /zillow\.com/i,
@@ -41,7 +42,7 @@ export default function Analyzer() {
       <main className="flex-1 flex flex-col pt-16">
         <h1 className="sr-only">Real Estate Market Analyzer</h1>
         <p className="text-center text-sm text-muted-foreground px-4 pt-4">
-          Pair any address with our <Link to="/buyers" className="underline underline-offset-2 hover:text-foreground">home affordability calculator</Link> to see what you can actually buy.
+          Pair any address with our <Link to="/buyers" onClick={clearActiveBuyerSession} className="underline underline-offset-2 hover:text-foreground">home affordability calculator</Link> to see what you can actually buy.
         </p>
         <AddressChat onBeforeSubmit={handleBeforeSubmit} />
       </main>

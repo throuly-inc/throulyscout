@@ -129,6 +129,12 @@ export function GenericCalculator({
     return range?.label ?? "";
   };
 
+  // True when this mount is re-entering an existing session to review/edit it
+  // (e.g. "Update my financial info" from Financial Health, via `?edit=1`),
+  // as opposed to a brand-new calculation. Safe to restore every field —
+  // including the buyer-profile ones below — since nothing is actually new.
+  const startAtReview = !!returnToReview && returnToReview > 0;
+
   const [currentStep, setCurrentStep] = useState<Step>(mode === "post-location" ? "property-type" : "location");
 
   // Jump to review step when returning from results
@@ -167,12 +173,23 @@ export function GenericCalculator({
   );
 
   // Buyer Profile — "Tell us about yourself" fields must ALWAYS start empty
-  // for every buyer. Never restore from initialValues / prior session / cache.
-  const [isFirstTimeBuyer, setIsFirstTimeBuyer] = useState<boolean | null>(null);
-  const [employmentType, setEmploymentType] = useState<"w2" | "self-employed" | "retired" | "other" | "">("");
+  // for every fresh calculation. Never restore from initialValues / prior
+  // session / cache — EXCEPT when re-entering an existing session to review
+  // it (startAtReview), where showing blank fields would silently wipe the
+  // buyer's real values if they submit without revisiting this step.
+  const [isFirstTimeBuyer, setIsFirstTimeBuyer] = useState<boolean | null>(
+    startAtReview ? initialValues?.financialProfile?.isFirstTimeBuyer ?? null : null,
+  );
+  const [employmentType, setEmploymentType] = useState<"w2" | "self-employed" | "retired" | "other" | "">(
+    startAtReview ? initialValues?.financialProfile?.employmentType ?? "" : "",
+  );
   const [employmentSelectOpen, setEmploymentSelectOpen] = useState(false);
-  const [loanTypeId, setLoanTypeId] = useState<string>("");
-  const [creditScoreRange, setCreditScoreRange] = useState<string>("");
+  const [loanTypeId, setLoanTypeId] = useState<string>(startAtReview ? initialValues?.loanTypeId ?? "" : "");
+  const [creditScoreRange, setCreditScoreRange] = useState<string>(
+    startAtReview && initialValues?.financialProfile?.creditScore
+      ? getCreditScoreLabel(initialValues.financialProfile.creditScore)
+      : "",
+  );
   // Track whether the current loanTypeId is our auto-suggestion (FHA for first-time
   // buyers) that the user hasn't confirmed or changed. Used so switching the
   // first-time answer back to "No" only clears loan type when it was our suggestion.
@@ -993,6 +1010,9 @@ export function GenericCalculator({
               </div>
               <h2 className="font-serif text-2xl text-foreground mb-2">What are your current monthly debt payments?</h2>
               <p className="text-muted-foreground">This affects your debt-to-income ratio</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Enter the minimum monthly payment for each — not the total balance owed.
+              </p>
             </div>
 
             <div className="space-y-5">
@@ -1013,6 +1033,7 @@ export function GenericCalculator({
                         <Input
                           type="text"
                           inputMode="numeric"
+                          placeholder="0"
                           value={amount && Number(amount) ? Number(amount).toLocaleString("en-US") : amount}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/[^0-9.]/g, "");
@@ -1020,9 +1041,10 @@ export function GenericCalculator({
                             const sanitized = parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : raw;
                             setDebtBreakdown((prev) => ({ ...prev, [key]: sanitized }));
                           }}
-                          className="h-9 w-28 border-0 bg-transparent text-right px-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                          aria-label={`${label} monthly amount`}
+                          className="h-9 w-28 border-0 border-b-2 border-input bg-transparent rounded-none text-right px-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-accent"
+                          aria-label={`${label} monthly payment`}
                         />
+                        <span className="text-xs text-muted-foreground">/mo</span>
                       </div>
                     </div>
                   );
@@ -1141,24 +1163,14 @@ export function GenericCalculator({
                 {/* Location */}
                 {editingSection === "location" ? (
                   <div className="space-y-3 pb-3 border-b border-border">
-                    <Select
+                    <StateCombobox
                       value={tempState?.name || ""}
-                      onValueChange={(stateName) => {
+                      onChange={(stateName) => {
                         const state = statesData.find((s) => s.name === stateName);
                         if (state) setTempState(state);
                       }}
-                    >
-                      <SelectTrigger className="h-10">
-                        <SelectValue placeholder="Select state..." />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-[300px]">
-                        {statesData.map((state) => (
-                          <SelectItem key={state.abbreviation} value={state.name}>
-                            {state.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      placeholder="Select state..."
+                    />
                     <div className="flex gap-2">
                       <Button size="sm" onClick={() => handleSaveEdit("location")} className="flex-1 gap-2">
                         <Check className="w-4 h-4" />

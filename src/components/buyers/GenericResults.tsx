@@ -96,15 +96,19 @@ interface GenericResultsProps {
   editingScenarioName?: string | null;
 }
 
-function generatePriceOptions(basePrice: number, maxAffordable: number): number[] {
+function generatePriceOptions(basePrice: number, maxAffordable: number, comfortablePrice: number): number[] {
   const step = 50000;
   const prices = [
+    // Anchor at least one or two options near the comfortable (standard-DTI)
+    // price so the grid isn't only "Not Recommended"/"Not Qualified" options
+    // when the user's chosen/max price is already at the edge of affordability.
+    comfortablePrice > 0 ? comfortablePrice - step : 0,
+    comfortablePrice > 0 ? comfortablePrice : 0,
     maxAffordable - step,
     maxAffordable,
     basePrice - step,
     basePrice,
     basePrice + step,
-    basePrice + step * 2,
   ].filter((p, index, arr) => p > 0 && arr.indexOf(p) === index);
 
   return prices.sort((a, b) => a - b).slice(0, 6);
@@ -146,6 +150,7 @@ function reverseCalcPriceFromPayment(
   hoaMonthly: number,
   loanTypeId: string,
   rateOverride?: number,
+  creditScore?: number,
 ): number {
   const loanType = LOAN_TYPES.find((lt) => lt.id === loanTypeId) || LOAN_TYPES[0];
   const loanTermYears = 30;
@@ -162,6 +167,7 @@ function reverseCalcPriceFromPayment(
       loanTermYears,
       loanType,
       rateOverride,
+      creditScore,
     );
     if (payment <= targetMonthly) {
       low = mid;
@@ -181,12 +187,13 @@ function calcMonthlyForPrice(
   loanTermYears: number,
   loanType: any,
   rateOverride?: number,
+  creditScore?: number,
 ): number {
   const downPaymentAmount = homePrice * (downPaymentPercent / 100);
   const baseLoanAmount = homePrice - downPaymentAmount;
   const upfrontMIP = loanType.id === "fha" ? baseLoanAmount * 0.0175 : 0;
   const loanAmount = baseLoanAmount + upfrontMIP;
-  const rateRange = getRateConfidenceBand(stateData.avgMortgageRate, loanType);
+  const rateRange = getRateConfidenceBand(stateData.avgMortgageRate, loanType, creditScore);
   const rate = rateOverride ?? rateRange.mid;
   const monthlyRate = rate / 100 / 12;
   const numPayments = loanTermYears * 12;
@@ -411,6 +418,7 @@ export function GenericResults({
       hoaMonthly,
       currentLoanTypeId,
       rateArg,
+      financialProfile.creditScore,
     );
   }, [
     targetPaymentEnabled,
@@ -421,6 +429,7 @@ export function GenericResults({
     currentLoanTypeId,
     selectedPrice,
     rateArg,
+    financialProfile.creditScore,
   ]);
 
   // The effective calc used everywhere
@@ -444,7 +453,30 @@ export function GenericResults({
     financialProfile.savings >= calc.totalCashNeeded,
     loanType,
   );
-  const priceOptions = generatePriceOptions(effectivePrice, calc.maxAffordablePrice);
+  // A price anchored to the standard (non-expanded) DTI caps, with a small
+  // safety margin so it lands clearly within — not right at — the target,
+  // for use as a "Qualified" anchor in the price comparison grid below.
+  const grossMonthlyIncome = financialProfile.yearlyIncome / 12;
+  const comfortableTargetMonthly = Math.max(
+    0,
+    Math.min(
+      grossMonthlyIncome * (loanType.maxFrontEndDTI / 100),
+      grossMonthlyIncome * (loanType.maxDTI / 100) - financialProfile.monthlyDebt,
+    ) * 0.9,
+  );
+  const comfortablePrice =
+    comfortableTargetMonthly > 0
+      ? reverseCalcPriceFromPayment(
+          comfortableTargetMonthly,
+          currentState,
+          selectedDownPayment,
+          hoaMonthly,
+          currentLoanTypeId,
+          rateArg,
+          financialProfile.creditScore,
+        )
+      : 0;
+  const priceOptions = generatePriceOptions(effectivePrice, calc.maxAffordablePrice, comfortablePrice);
   const dtiLabels = getDTITargetLabel(loanType);
 
   // Min payment at lowest comparison price

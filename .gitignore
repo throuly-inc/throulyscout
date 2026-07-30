@@ -12,15 +12,6 @@ dist
 dist-ssr
 *.local
 
-# Python bytecode from e2e tests
-__pycache__/
-
-# Local env overrides (`.env` itself is tracked: it holds only publishable values)
-.env.local
-.env.staging
-.env.production
-.env*.local
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

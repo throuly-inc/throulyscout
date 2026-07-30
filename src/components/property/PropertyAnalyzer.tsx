@@ -51,7 +51,7 @@ export function PropertyAnalyzer({ userId }: PropertyAnalyzerProps) {
     setResults(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('analyze-property', {
+      const { data, error } = await supabase.functions.invoke('throulyscout-analyze-property', {
         body: { 
           listingUrl,
           financialProfile: showFinancialProfile ? financialProfile : null

@@ -6,6 +6,7 @@ import { QualifyingPrograms } from "@/components/buyers/QualifyingPrograms";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
 import { SEO } from "@/components/seo/SEO";
@@ -96,7 +97,7 @@ export default function BuyersPrograms() {
             <p className="text-muted-foreground">
               Based on your profile in {stateName || "your state"}, here are assistance programs, grants, and tax
               credits you may be eligible for. Combine them with our{" "}
-              <a href="/buyers" className="underline underline-offset-2 hover:text-foreground">home affordability calculator</a>{" "}
+              <a href="/buyers" onClick={clearActiveBuyerSession} className="underline underline-offset-2 hover:text-foreground">home affordability calculator</a>{" "}
               to see your true buying power.
             </p>
           </div>

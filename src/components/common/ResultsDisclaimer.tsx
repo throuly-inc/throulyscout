@@ -1,5 +1,6 @@
 import { Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 /**
  * Single source of truth for results-page disclaimer copy.
@@ -27,7 +28,16 @@ export function ResultsDisclaimer({ variant, className }: ResultsDisclaimerProps
           className,
         )}
       >
-        <Info aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button" aria-label="Disclaimer details" className="shrink-0">
+              <Info aria-hidden="true" className="h-3.5 w-3.5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs">
+            <p>{DISCLAIMER_LONG}</p>
+          </TooltipContent>
+        </Tooltip>
         <span className="break-words">{DISCLAIMER_SHORT}</span>
       </div>
     );

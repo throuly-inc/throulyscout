@@ -241,6 +241,7 @@ export function parseCompareInput(input: string): [ParsedLocation, ParsedLocatio
   return null;
 }
 
+
 // Generate full analysis data for a state
 export interface StateAnalysis {
   stateAbbr: string;
@@ -331,3 +332,4 @@ export function analyzeState(abbr: string): StateAnalysis | null {
     closingCosts, annualPropertyTax: annualPropTax, buyerPrograms, investmentVerdict,
   };
 }
+

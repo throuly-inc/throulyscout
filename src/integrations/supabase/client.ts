@@ -34,6 +34,9 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  db: {
+    schema: 'throulyscout',
+  },
   global: {
     fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),
   },

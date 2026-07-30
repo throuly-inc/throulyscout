@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Home, ArrowRight } from "lucide-react";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 interface SignUpModalProps {
   open: boolean;
@@ -13,6 +14,7 @@ export function SignUpModal({ open, onOpenChange }: SignUpModalProps) {
 
   const handleContinue = () => {
     onOpenChange(false);
+    clearActiveBuyerSession();
     navigate("/buyers");
   };
 

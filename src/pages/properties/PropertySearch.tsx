@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/contexts/SubscriptionContext";
@@ -36,6 +36,7 @@ export default function PropertySearch() {
   const { profile } = useAuth();
   const { canAccess } = useSubscription();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const dashboardHref = "/dashboard/client";
   const isPremium = canAccess("full_address");
 
@@ -43,7 +44,7 @@ export default function PropertySearch() {
   const [loading, setLoading] = useState(false);
 
   // Filters
-  const [stateFilter, setStateFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState(() => searchParams.get("state") || "");
   const [cityFilter, setCityFilter] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");

@@ -13,6 +13,7 @@ import {
 import { Shield, FileCheck2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import heroCoupleImg from "@/assets/hero-couple.jpg";
 
 interface HeroSectionProps {
@@ -181,6 +182,7 @@ export function HeroSection({ onLearnMore }: HeroSectionProps) {
               <div className="hidden lg:flex flex-wrap items-center gap-3">
                 <Link
                   to={user ? "/dashboard" : "/buyers"}
+                  onClick={user ? undefined : clearActiveBuyerSession}
                   className="inline-flex items-center justify-center transition-all"
                   style={{
                     background: INK,
@@ -322,6 +324,7 @@ export function HeroSection({ onLearnMore }: HeroSectionProps) {
                     <div className="flex flex-wrap items-center gap-3">
                       <Link
                         to={user ? "/dashboard" : "/buyers"}
+                        onClick={user ? undefined : clearActiveBuyerSession}
                         className="inline-flex items-center justify-center transition-all"
                         style={{
                           background: INK,

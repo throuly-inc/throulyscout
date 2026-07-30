@@ -47,13 +47,13 @@ export default function ProfileSettings() {
       const filePath = `${user.id}/avatar.${ext}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("avatars")
+        .from("throulyscout-avatars")
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
       const { data: publicData } = supabase.storage
-        .from("avatars")
+        .from("throulyscout-avatars")
         .getPublicUrl(filePath);
 
       const publicUrl = publicData.publicUrl + `?t=${Date.now()}`;

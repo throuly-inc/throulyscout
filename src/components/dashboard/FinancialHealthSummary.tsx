@@ -11,6 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { formatCurrency } from "@/lib/calculator";
 import { statesData } from "@/lib/states";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 interface Props {
   report: any | null;
@@ -136,7 +137,13 @@ export function FinancialHealthSummary({ report, loading }: Props) {
                 Complete Step 1 to see your score, comfortable budget, and factor breakdown here.
               </p>
             </div>
-            <Button size="sm" onClick={() => navigate("/buyers")}>
+            <Button
+              size="sm"
+              onClick={() => {
+                clearActiveBuyerSession();
+                navigate("/buyers");
+              }}
+            >
               Start Step 1: Financial Health
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

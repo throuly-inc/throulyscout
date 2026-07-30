@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Clock, HelpCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/seo/SEO";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import heroImage from "@/assets/guides/investors-hero.jpg";
 import { isGuideFaqVisible } from "@/config/guideFaqVisibility";
 
@@ -114,7 +115,7 @@ const InvestorsGuide = () => {
 
             <h2 className="font-serif text-2xl text-foreground pt-4">Cash-on-cash tells you the real story</h2>
             <p>
-              Cap rate ignores your loan. Cash-on-cash doesn't. Take your annual pre-tax cash flow and divide by everything you actually put in — down payment, closing costs, initial repairs. This is the number your bank account feels. Our <Link to="/buyers" className="underline underline-offset-2 hover:text-foreground">home affordability calculator</Link> can size the loan side for you in seconds.
+              Cap rate ignores your loan. Cash-on-cash doesn't. Take your annual pre-tax cash flow and divide by everything you actually put in — down payment, closing costs, initial repairs. This is the number your bank account feels. Our <Link to="/buyers" onClick={clearActiveBuyerSession} className="underline underline-offset-2 hover:text-foreground">home affordability calculator</Link> can size the loan side for you in seconds.
             </p>
 
             <h2 className="font-serif text-2xl text-foreground pt-4">Don't forget the boring expenses</h2>
@@ -163,7 +164,7 @@ const InvestorsGuide = () => {
             <p className="text-white/80 mb-6 max-w-lg mx-auto">
               Model cap rate, NOI, and cash-on-cash across any market in the country.
             </p>
-            <Link to="/buyers">
+            <Link to="/buyers" onClick={clearActiveBuyerSession}>
               <Button variant="secondary" size="lg" className="bg-white text-accent hover:bg-white/90">
                 Start analyzing properties
               </Button>
