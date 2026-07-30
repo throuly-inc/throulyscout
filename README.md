@@ -80,7 +80,8 @@ Set the secrets for the features you need:
 | --- | --- | --- |
 | `GEMINI_API_KEY` | `chat`, `analyze-property`, `analyze-address`, `get-assistance-programs` | [Google AI Studio](https://aistudio.google.com/); free tier available |
 | `RESEND_API_KEY` | `process-email-queue` | [Resend](https://resend.com/); free tier available |
-| `EMAIL_FROM` | `process-email-queue` | Optional override, e.g. `Throuly Scout <no-reply@throulyscout.com>`; must be on a Resend-verified domain |
+| `EMAIL_FROM` | `process-email-queue` | Optional override, e.g. `Throuly <no-reply@throuly.com>`; must be on a Resend-verified domain |
+| `EMAIL_SUBJECT_PREFIX` | `process-email-queue` | Optional, e.g. `[STAGING] ` on non-production projects; leave unset in production |
 | `STRIPE_SECRET_KEY` | `create-checkout`, `customer-portal`, `check-subscription` | Use `sk_test_...` outside production |
 | `FIRECRAWL_API_KEY` | `analyze-property`, `analyze-address`, `parse-property-listing` | Optional; analyzers fall back to AI estimates without it |
 | `GOOGLE_MAPS_API_KEY` | `places-autocomplete` | |

@@ -35,11 +35,15 @@ interface EmailPayload {
 // Send one email via the Resend API.
 // EMAIL_FROM (Supabase secret) overrides the enqueued payload's `from` so the
 // sender is always an address on the Resend-verified domain.
+// EMAIL_SUBJECT_PREFIX (optional secret) is prepended to every subject —
+// set it to e.g. "[STAGING] " on non-production projects so test emails
+// are unmistakable. Leave unset in production.
 async function sendResendEmail(payload: EmailPayload, apiKey: string): Promise<void> {
   const from = Deno.env.get('EMAIL_FROM') ?? payload.from
   if (!from) {
     throw new EmailAPIError(400, 'No from address: set the EMAIL_FROM secret or include `from` in the payload')
   }
+  const subjectPrefix = Deno.env.get('EMAIL_SUBJECT_PREFIX') ?? ''
 
   const headers: Record<string, string> = {
     Authorization: `Bearer ${apiKey}`,
@@ -54,7 +58,7 @@ async function sendResendEmail(payload: EmailPayload, apiKey: string): Promise<v
     body: JSON.stringify({
       from,
       to: payload.to,
-      subject: payload.subject,
+      subject: `${subjectPrefix}${payload.subject}`,
       html: payload.html,
       text: payload.text,
     }),
