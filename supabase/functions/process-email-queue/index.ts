@@ -8,6 +8,13 @@ const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 60
 
 const RESEND_API_URL = 'https://api.resend.com/emails'
 
+// Environment detection: set the ENVIRONMENT secret to "production" on the
+// production Supabase project only. Anything else (staging, dev clones, or
+// the secret left unset) marks outgoing email with a "[STAGING] " subject
+// prefix, so test emails are unmistakable by default.
+const IS_PRODUCTION = Deno.env.get('ENVIRONMENT') === 'production'
+const SUBJECT_PREFIX = IS_PRODUCTION ? '' : '[STAGING] '
+
 // Structured send error carrying the HTTP status and Retry-After so the
 // retry/DLQ logic below can distinguish rate limits (429) from permanent
 // failures (403) and transient ones.
@@ -35,15 +42,11 @@ interface EmailPayload {
 // Send one email via the Resend API.
 // EMAIL_FROM (Supabase secret) overrides the enqueued payload's `from` so the
 // sender is always an address on the Resend-verified domain.
-// EMAIL_SUBJECT_PREFIX (optional secret) is prepended to every subject —
-// set it to e.g. "[STAGING] " on non-production projects so test emails
-// are unmistakable. Leave unset in production.
 async function sendResendEmail(payload: EmailPayload, apiKey: string): Promise<void> {
   const from = Deno.env.get('EMAIL_FROM') ?? payload.from
   if (!from) {
     throw new EmailAPIError(400, 'No from address: set the EMAIL_FROM secret or include `from` in the payload')
   }
-  const subjectPrefix = Deno.env.get('EMAIL_SUBJECT_PREFIX') ?? ''
 
   const headers: Record<string, string> = {
     Authorization: `Bearer ${apiKey}`,
@@ -58,7 +61,7 @@ async function sendResendEmail(payload: EmailPayload, apiKey: string): Promise<v
     body: JSON.stringify({
       from,
       to: payload.to,
-      subject: `${subjectPrefix}${payload.subject}`,
+      subject: `${SUBJECT_PREFIX}${payload.subject}`,
       html: payload.html,
       text: payload.text,
     }),
