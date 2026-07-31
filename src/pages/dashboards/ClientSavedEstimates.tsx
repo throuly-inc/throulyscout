@@ -46,6 +46,7 @@ import { statesData } from "@/lib/states";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ResultsDisclaimer } from "@/components/common/ResultsDisclaimer";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 interface SavedScenario {
   id: string;
@@ -91,7 +92,10 @@ export default function ClientSavedEstimates() {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      setScenarios(data as unknown as SavedScenario[]);
+      // Exclude scenarios saved by other features that share this table
+      // (e.g. saved market analyses, assistance-program lookups) so they
+      // don't count against the calculator estimate limit below.
+      setScenarios((data as unknown as SavedScenario[]).filter((s) => !s.inputs?.type));
     }
     setLoading(false);
   };
@@ -269,7 +273,7 @@ export default function ClientSavedEstimates() {
               <p className="text-lg text-muted-foreground">No saved estimates yet.</p>
               <p className="text-sm text-muted-foreground">
                 Use the{" "}
-                <Link to="/buyers" className="text-primary underline">
+                <Link to="/buyers" onClick={clearActiveBuyerSession} className="text-primary underline">
                   affordability calculator
                 </Link>{" "}
                 and click "Save estimate" to save it here.

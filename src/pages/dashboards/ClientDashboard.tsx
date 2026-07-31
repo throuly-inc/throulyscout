@@ -12,7 +12,9 @@ import { useToast } from "@/hooks/use-toast";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { formatCurrency, calculateMortgage } from "@/lib/calculator";
 import { statesData, type StateData } from "@/lib/states";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SavingsGoalPlanner } from "@/components/dashboard/SavingsGoalPlanner";
 import { HomePurchasePlanner } from "@/components/dashboard/HomePurchasePlanner";
 import { QualifyingPrograms } from "@/components/buyers/QualifyingPrograms";
@@ -57,8 +59,30 @@ export default function ClientDashboard() {
 
   const latestEstimate = fhDerivedEstimate || estimates[0] || null;
   const originalEstimate = !fhDerivedEstimate && estimates.length > 1 ? estimates[estimates.length - 1] : null;
-  const mainEstimate = originalEstimate || latestEstimate;
-  const updatedEstimate = originalEstimate ? estimates[0] : null;
+  const defaultEstimate = originalEstimate || latestEstimate;
+
+  // When the buyer has more than one saved calculator result, let them pick
+  // which one drives the Estimate card, Savings Planner, and Programs tab —
+  // instead of silently always using the most recent.
+  const [selectedEstimateId, setSelectedEstimateId] = useState<string | null>(null);
+  const estimateOptions = useMemo(() => {
+    const opts: { id: string; label: string; estimate: any }[] = [];
+    if (fhDerivedEstimate) {
+      opts.push({ id: fhDerivedEstimate.id, label: "Current (Financial Health)", estimate: fhDerivedEstimate });
+    }
+    for (const e of estimates) {
+      if (opts.some((o) => o.id === e.id)) continue;
+      const state = e.inputs?.state || "Unknown state";
+      const dateLabel = e.created_at ? format(new Date(e.created_at), "MMM d, yyyy") : "";
+      opts.push({ id: e.id, label: dateLabel ? `${state} · ${dateLabel}` : state, estimate: e });
+    }
+    return opts;
+  }, [fhDerivedEstimate, estimates]);
+  const selectedOverride = selectedEstimateId
+    ? estimateOptions.find((o) => o.id === selectedEstimateId)?.estimate ?? null
+    : null;
+  const mainEstimate = selectedOverride || defaultEstimate;
+  const updatedEstimate = !selectedOverride && originalEstimate ? estimates[0] : null;
 
   const [estimateLoading, setEstimateLoading] = useState(true);
   const { toast } = useToast();
@@ -309,11 +333,13 @@ export default function ClientDashboard() {
             {user && <NotificationBell userId={user.id} />}
           </div>
           <div className="relative mt-5 flex flex-wrap gap-2">
-            <Link to="/properties/search">
-              <Button size="sm" className="bg-[var(--scout)] hover:bg-[var(--scout)]/90 text-white border-0">
-                <Search className="w-4 h-4 mr-2" /> Find Properties
-              </Button>
-            </Link>
+            <Button
+              size="sm"
+              className="bg-[var(--scout)] hover:bg-[var(--scout)]/90 text-white border-0"
+              onClick={() => setComingSoonLabel("Find Properties")}
+            >
+              <Search className="w-4 h-4 mr-2" /> Find Properties
+            </Button>
             <Link to="/dashboard/client/preferences">
               <Button size="sm" className="bg-[var(--compass)] hover:bg-[var(--compass)]/90 text-white border-0">
                 <Settings className="w-4 h-4 mr-2" /> Preferences
@@ -326,6 +352,27 @@ export default function ClientDashboard() {
             </Link>
           </div>
         </div>
+
+        {estimateOptions.length > 1 && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground shrink-0">Viewing estimate:</span>
+            <Select
+              value={selectedEstimateId ?? mainEstimate?.id ?? ""}
+              onValueChange={(id) => setSelectedEstimateId(id)}
+            >
+              <SelectTrigger className="h-8 w-auto min-w-[200px] text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {estimateOptions.map((o) => (
+                  <SelectItem key={o.id} value={o.id}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Planning Tabs */}
         <Tabs
@@ -385,12 +432,10 @@ export default function ClientDashboard() {
                 onSwitchTab={setActiveTab}
               />
             )}
-            <div data-sensitive="true">
-              <FinancialHealthSummary report={financialHealth} loading={financialHealthLoading} />
-            </div>
+            <FinancialHealthSummary report={financialHealth} loading={financialHealthLoading} />
             {!estimateLoading && !financialHealthLoading &&
               (mainEstimate ? (
-                <Card className="border-accent/30" data-sensitive="true">
+                <Card className="border-accent/30">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">
                       <div>
@@ -549,7 +594,7 @@ export default function ClientDashboard() {
                         No estimate yet — try the Home Affordability Calculator
                       </p>
                     </div>
-                    <Link to="/buyers">
+                    <Link to="/buyers" onClick={clearActiveBuyerSession}>
                       <Button size="sm" className="bg-accent hover:bg-accent/90 text-accent-foreground">
                         Get Started <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
@@ -560,9 +605,7 @@ export default function ClientDashboard() {
             <div className="mt-4">
               <ScenarioSwitcher onLoad={handleLoadSavedScenario} userId={user?.id ?? null} />
             </div>
-            <div data-sensitive="true">
-              <FinancialHealthTrackers estimate={mainEstimate} loading={estimateLoading} />
-            </div>
+            <FinancialHealthTrackers estimate={mainEstimate} loading={estimateLoading} />
           </TabsContent>
 
           <TabsContent value="savings" className="mt-4">
@@ -599,7 +642,7 @@ export default function ClientDashboard() {
                   <p className="text-sm text-muted-foreground">
                     Save an estimate first so we can match you to programs in your state.
                   </p>
-                  <Link to="/buyers">
+                  <Link to="/buyers" onClick={clearActiveBuyerSession}>
                     <Button size="sm" className="bg-accent hover:bg-accent/90 text-accent-foreground">
                       Start an Estimate <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>

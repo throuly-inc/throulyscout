@@ -9,9 +9,10 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, Search, Bed, Bath, Maximize, MapPin, X } from "lucide-react";
+import { ArrowLeft, Save, Search, X } from "lucide-react";
 import { US_STATES } from "@/lib/states";
 import { useToast } from "@/hooks/use-toast";
+import { ComingSoonModal } from "@/components/common/ComingSoonModal";
 
 const PROPERTY_TYPES = [
   { value: "any", label: "Any" },
@@ -28,24 +29,10 @@ const TIMELINES = [
   { value: "just browsing", label: "Just Browsing" },
 ];
 
-interface MatchProperty {
-  id: string;
-  address: string;
-  city: string | null;
-  state: string | null;
-  asking_price: number | null;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  sqft: number | null;
-  photos: string[] | null;
-  status: string;
-  listing_type: string | null;
-}
 
 export default function ClientPreferences() {
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const isPremium = profile?.subscription_tier !== "free";
 
   const [budgetMin, setBudgetMin] = useState("");
   const [budgetMax, setBudgetMax] = useState("");
@@ -59,9 +46,7 @@ export default function ClientPreferences() {
   const [saved, setSaved] = useState(false);
   const [loadingPrefs, setLoadingPrefs] = useState(true);
 
-  const [matches, setMatches] = useState<MatchProperty[]>([]);
-  const [showMatches, setShowMatches] = useState(false);
-  const [loadingMatches, setLoadingMatches] = useState(false);
+  const [comingSoonLabel, setComingSoonLabel] = useState<string | null>(null);
 
   // Load existing preferences
   useEffect(() => {
@@ -115,29 +100,6 @@ export default function ClientPreferences() {
     }
   };
 
-  const handleViewMatches = async () => {
-    setLoadingMatches(true);
-    setShowMatches(true);
-
-    let query = supabase
-      .from("properties")
-      .select(
-        "id, address, city, state, zip, asking_price, bedrooms, bathrooms, sqft, photos, description, status, listing_type",
-      )
-      .eq("status", "active");
-
-
-    if (budgetMin) query = query.gte("asking_price", Number(budgetMin));
-    if (budgetMax) query = query.lte("asking_price", Number(budgetMax));
-    if (selectedStates.length > 0) query = query.in("state", selectedStates);
-    if (Number(bedroomsMin) > 1) query = query.gte("bedrooms", Number(bedroomsMin));
-
-    query = query.order("asking_price", { ascending: true }).limit(50);
-
-    const { data } = await query;
-    setMatches((data as MatchProperty[]) || []);
-    setLoadingMatches(false);
-  };
 
   const addState = (val: string) => {
     if (val && !selectedStates.includes(val)) {
@@ -263,69 +225,20 @@ export default function ClientPreferences() {
             </Card>
 
             {saved && (
-              <Button variant="default" className="w-full" onClick={handleViewMatches} disabled={loadingMatches}>
+              <Button variant="default" className="w-full" onClick={() => setComingSoonLabel("View Matches")}>
                 <Search className="w-4 h-4 mr-2" />
                 View Matches
               </Button>
             )}
-
-            {/* Match Results */}
-            {showMatches && (
-              <div className="space-y-4">
-                <h2 className="font-serif text-2xl text-foreground">Matching Properties</h2>
-                {loadingMatches ? (
-                  <div className="flex justify-center py-8">
-                    <div className="w-6 h-6 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : matches.length === 0 ? (
-                  <Card>
-                    <CardContent className="py-12 text-center">
-                      <MapPin className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
-                      <p className="text-muted-foreground">No matching properties found.</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {matches.map((prop) => (
-                      <Link key={prop.id} to={`/properties/${prop.id}`}>
-                        <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
-                          <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-                            {prop.photos?.[0] ? (
-                              <img src={prop.photos[0]} alt={prop.address} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <MapPin className="w-12 h-12 text-muted-foreground/30" />
-                              </div>
-                            )}
-                          </div>
-                          <CardContent className="p-4 space-y-2">
-                            <p className="font-serif text-xl text-foreground">
-                              {prop.asking_price != null ? "$" + prop.asking_price.toLocaleString("en-US") : "Price TBD"}
-                            </p>
-                            {isPremium ? (
-                              <p className="text-sm text-muted-foreground truncate">{prop.address}</p>
-                            ) : (
-                              <p className="text-sm text-muted-foreground blur-[3px] select-none" aria-hidden>{prop.address}</p>
-                            )}
-                            <p className="text-sm text-muted-foreground">
-                              {prop.city}{prop.city && prop.state ? ", " : ""}{prop.state}
-                            </p>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              {prop.bedrooms != null && <span className="flex items-center gap-1"><Bed className="w-4 h-4" />{prop.bedrooms}</span>}
-                              {prop.bathrooms != null && <span className="flex items-center gap-1"><Bath className="w-4 h-4" />{prop.bathrooms}</span>}
-                              {prop.sqft != null && <span className="flex items-center gap-1"><Maximize className="w-4 h-4" />{prop.sqft.toLocaleString()}</span>}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
           </>
         )}
       </main>
+
+      <ComingSoonModal
+        open={!!comingSoonLabel}
+        label={comingSoonLabel || ""}
+        onClose={() => setComingSoonLabel(null)}
+      />
     </div>
   );
 }

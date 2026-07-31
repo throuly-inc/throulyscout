@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 export default function Welcome() {
   const navigate = useNavigate();
@@ -11,7 +12,14 @@ export default function Welcome() {
         <p className="text-lg text-muted-foreground">
           Calculate what you can afford and get roadmap-ready for your first home.
         </p>
-        <Button size="lg" onClick={() => navigate("/buyers")} className="gap-2 min-w-[200px]">
+        <Button
+          size="lg"
+          onClick={() => {
+            clearActiveBuyerSession();
+            navigate("/buyers");
+          }}
+          className="gap-2 min-w-[200px]"
+        >
           Start My Estimate <ArrowRight className="w-4 h-4" />
         </Button>
       </div>

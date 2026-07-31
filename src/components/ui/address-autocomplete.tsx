@@ -79,7 +79,7 @@ export function AddressAutocomplete({
     debounceRef.current = window.setTimeout(async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase.functions.invoke("places-autocomplete", {
+        const { data, error } = await supabase.functions.invoke("throulyscout-places-autocomplete", {
           body: { action: "search", input: value, sessionToken: sessionTokenRef.current },
         });
         if (error) throw error;
@@ -104,7 +104,7 @@ export function AddressAutocomplete({
       skipNextSearchRef.current = true;
       onChange(useFormattedOnSelect ? p.text : value);
       try {
-        const { data, error } = await supabase.functions.invoke("places-autocomplete", {
+        const { data, error } = await supabase.functions.invoke("throulyscout-places-autocomplete", {
           body: { action: "details", placeId: p.placeId, sessionToken: sessionTokenRef.current },
         });
         if (error) throw error;

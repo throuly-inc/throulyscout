@@ -113,13 +113,6 @@ export const TASKS: TaskDef[] = [
 
   // Documents - shared
   {
-    id: "doc_id",
-    phase: "documents",
-    title: "Government-issued ID",
-    summary: "A valid photo ID (driver's license, passport, or state ID).",
-    category: "document",
-  },
-  {
     id: "doc_bank",
     phase: "documents",
     title: "Recent bank statements",
@@ -360,8 +353,9 @@ export const LEGACY_ID_MAP: Record<string, string> = {
   w2s: "doc_w2",
   "tax-returns": "doc_personal_tax",
   "bank-statements": "doc_bank",
-  id: "doc_id",
   preapproval: "preapproved",
+  
+
   
   wants: "must_haves",
   neighborhoods: "locations",

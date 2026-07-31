@@ -17,6 +17,25 @@ export const BUYER_LOCAL_STORAGE_KEYS = [
 ] as const;
 
 /**
+ * Clears just the in-progress calculator run (inputs + editing marker) so a
+ * "Buyer Calculator" / "Try the calculator" link starts a fresh calculation
+ * instead of dropping the user back into their last results. Unlike
+ * `clearBuyerSessionData`, this intentionally leaves saved scenarios and
+ * other longer-lived localStorage data untouched.
+ */
+export function clearActiveBuyerSession() {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem("throuly_buyers_session");
+    sessionStorage.removeItem("throuly_editing_scenario");
+    sessionStorage.removeItem("throuly_pending_save");
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+
  * Clears every trace of the previous buyer's financial-health / calculator
  * data from browser storage so a logged-out user starting the calculator
  * again does NOT see the previous user's inputs, results, or scenarios.

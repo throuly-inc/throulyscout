@@ -12,7 +12,7 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  public: {
+  throulyscout: {
     Tables: {
       buyer_questionnaires: {
         Row: {
@@ -702,19 +702,19 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          role: Database["public"]["Enums"]["app_role"]
+          role: Database["throulyscout"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          role?: Database["throulyscout"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          role?: Database["throulyscout"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
@@ -874,7 +874,7 @@ export type Database = {
       get_user_role: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
-          _role: Database["public"]["Enums"]["app_role"]
+          _role: Database["throulyscout"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
@@ -908,7 +908,7 @@ export type Database = {
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "throulyscout">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
@@ -1024,7 +1024,7 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  public: {
+  throulyscout: {
     Enums: {
       app_role: ["admin", "user", "premium", "agent", "broker", "client"],
     },

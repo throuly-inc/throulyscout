@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 interface ProductHeroProps {
   bgColor: string;
@@ -125,6 +126,7 @@ export function ProductHero({
               {primaryHref ? (
                 <Link
                   to={primaryHref}
+                  onClick={primaryHref === "/buyers" ? clearActiveBuyerSession : undefined}
                   className="transition-all duration-200 animate-cta-bounce"
                   style={{
                     background: primaryBg,

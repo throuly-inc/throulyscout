@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MapPin, Home, BadgeDollarSign, BookOpen, HelpCircle } from "lucide-react";
 import { SEO } from "@/components/seo/SEO";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import { getStateByAbbreviation, getStateByName, statesData } from "@/lib/states";
 import { formatCurrency } from "@/lib/calculator";
 
@@ -168,7 +169,7 @@ export const StateProgramsGuide = () => {
               Plug in your income, debts, and savings to see what you can afford — including taxes, insurance, and PMI. No credit pull.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link to={`/buyers?state=${stateAbbr}`}>
+              <Link to={`/buyers?state=${stateAbbr}`} onClick={clearActiveBuyerSession}>
                 <Button variant="secondary" size="lg" className="bg-white text-accent hover:bg-white/90">
                   Try the calculator
                 </Button>

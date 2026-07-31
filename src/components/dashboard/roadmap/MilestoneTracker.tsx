@@ -4,7 +4,7 @@ import type { PhaseId } from "./types";
 
 interface Props {
   phases: PhaseSummary[];
-  currentId: PhaseId;
+  currentId: PhaseId | "";
   onSelect: (id: PhaseId) => void;
 }
 

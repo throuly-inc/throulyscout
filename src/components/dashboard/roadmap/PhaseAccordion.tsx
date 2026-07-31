@@ -7,8 +7,8 @@ import type { PhaseId, TaskState } from "./types";
 
 interface Props {
   phases: PhaseSummary[];
-  openId: PhaseId;
-  onOpenChange: (id: PhaseId) => void;
+  openId: PhaseId | "";
+  onOpenChange: (id: PhaseId | "") => void;
   taskStates: Record<string, TaskState>;
   autoCompletedIds: Set<string>;
   autoReasons: Record<string, string>;
@@ -30,7 +30,7 @@ export function PhaseAccordion({
       type="single"
       collapsible
       value={openId}
-      onValueChange={(v) => v && onOpenChange(v as PhaseId)}
+      onValueChange={(v) => onOpenChange(v as PhaseId | "")}
       className="space-y-3"
     >
       {phases.map((p) => {

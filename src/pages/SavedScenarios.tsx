@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { ComingSoonModal } from "@/components/common/ComingSoonModal";
 import { ResultsDisclaimer } from "@/components/common/ResultsDisclaimer";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 interface LocalScenario {
   id: string;
@@ -106,7 +107,7 @@ const SavedScenarios = () => {
               <p className="text-lg font-medium mb-2">No saved scenarios yet</p>
               <p className="text-muted-foreground mb-6">Run a buyer or seller analysis to save your first one.</p>
               <div className="flex gap-3 justify-center">
-                <Link to="/buyers">
+                <Link to="/buyers" onClick={clearActiveBuyerSession}>
                   <Button variant="accent">Buyer Calculator</Button>
                 </Link>
                 <Button variant="outline" onClick={() => setComingSoonLabel("Seller Tools")}>

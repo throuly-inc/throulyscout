@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Lock, Sparkles, MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import scoutMapIllustration from "@/assets/scout-map-illustration.png";
 
 const TEAL = "#5b5bd6";
@@ -126,6 +127,7 @@ export function ScoutSpotlightSection() {
 
               <Link
                 to="/buyers"
+                onClick={clearActiveBuyerSession}
                 className="scout-arrow-hover inline-flex items-center gap-2 transition-all"
                 style={{
                   background: INK,

@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatCurrency } from "@/lib/calculator";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -176,7 +177,7 @@ function NumberField({
 }
 
 const fmtDate = (d: Date | null) =>
-  d ? d.toLocaleDateString(undefined, { month: "long", year: "numeric" }) : "—";
+  d ? d.toLocaleDateString(undefined, { month: "short", year: "numeric" }) : "—";
 
 const fmtTime = (m: number | null) => {
   if (m === null) return "—";
@@ -217,6 +218,32 @@ export function SavingsGoalPlanner({
   userId = null,
 }: Props) {
   const { toast } = useToast();
+  // Controlled so "jump to X" CTAs (below) can switch tabs before scrolling —
+  // the anchor ids live inside TabsContent panels, which are hidden/unmounted
+  // when their tab isn't active, so scrollIntoView alone silently did nothing.
+  const [innerTab, setInnerTab] = useState<string>("budget");
+  const ANCHOR_TAB: Record<string, string> = {
+    "budget-anchor": "budget",
+    "checkin-anchor": "checkin",
+    "simulator-anchor": "explore",
+  };
+  // Queue a scroll target instead of firing scrollIntoView immediately —
+  // requestAnimationFrame after setInnerTab was not a reliable enough
+  // guarantee that the tab's content had actually committed to the DOM yet.
+  // A useEffect keyed on this id runs strictly after React commits the
+  // corresponding render (including any tab switch above), which is the one
+  // guarantee we actually need.
+  const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
+  const scrollToAnchor = (id: string) => {
+    const tab = ANCHOR_TAB[id];
+    if (tab) setInnerTab(tab);
+    setPendingScrollId(id);
+  };
+  useEffect(() => {
+    if (!pendingScrollId) return;
+    document.getElementById(pendingScrollId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setPendingScrollId(null);
+  }, [pendingScrollId, innerTab]);
   const [goal, setGoal] = useState<number>(defaultGoal);
   const [currentSavings, setCurrentSavings] = useState<number>(defaultCurrentSavings);
   const [monthlyIncome, setMonthlyIncome] = useState<number>(defaultIncome);
@@ -918,7 +945,7 @@ export function SavingsGoalPlanner({
         )} would put you back on pace.`,
         cta: {
           label: "Adjust budget",
-          onClick: () => document.getElementById("budget-anchor")?.scrollIntoView({ behavior: "smooth" }),
+          onClick: () => scrollToAnchor("budget-anchor"),
         },
       });
     }
@@ -935,7 +962,7 @@ export function SavingsGoalPlanner({
         } sooner.`,
         cta: {
           label: "Explore a faster plan",
-          onClick: () => document.getElementById("simulator-anchor")?.scrollIntoView({ behavior: "smooth" }),
+          onClick: () => scrollToAnchor("simulator-anchor"),
         },
       });
     }
@@ -945,7 +972,7 @@ export function SavingsGoalPlanner({
       text: "We need your income and expenses to personalize recommendations.",
       cta: {
         label: "Complete budget",
-        onClick: () => document.getElementById("budget-anchor")?.scrollIntoView({ behavior: "smooth" }),
+        onClick: () => scrollToAnchor("budget-anchor"),
       },
     });
   }
@@ -1194,7 +1221,7 @@ export function SavingsGoalPlanner({
           approval, loan qualification, or financial advice.
         </p>
         <div className="flex justify-end">
-          <Link to="/buyers">
+          <Link to="/buyers" onClick={clearActiveBuyerSession}>
             <Button size="sm" variant="outline">
               See what I may be able to afford <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </Button>
@@ -1294,16 +1321,12 @@ export function SavingsGoalPlanner({
               key={i}
               size="sm"
               variant={i === 0 ? "default" : "outline"}
-              onClick={() =>
-                document
-                  .getElementById(s.to.slice(1))
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
+              onClick={() => scrollToAnchor(s.to.slice(1))}
             >
               {s.label} <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </Button>
           ) : (
-            <Link key={i} to={s.to}>
+            <Link key={i} to={s.to} onClick={s.to === "/buyers" ? clearActiveBuyerSession : undefined}>
               <Button size="sm" variant={i === 0 ? "default" : "outline"}>
                 {s.label} <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
@@ -1486,7 +1509,7 @@ export function SavingsGoalPlanner({
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-4 pt-5 border-t border-foreground/5">
+              <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_260px] gap-4 pt-5 border-t border-foreground/5">
                 <div className="rounded-xl border border-accent/30 p-4 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="w-4 h-4 text-accent" />
@@ -1564,7 +1587,7 @@ export function SavingsGoalPlanner({
             </p>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="budget" className="w-full">
+            <Tabs value={innerTab} onValueChange={setInnerTab} className="w-full">
               <TabsList className="grid grid-cols-2 sm:grid-cols-4 h-auto gap-1 bg-muted/60 p-1">
                 <TabsTrigger value="budget" className="text-xs sm:text-sm py-2">
                   <Wallet className="w-3.5 h-3.5 mr-1.5" />
@@ -1613,6 +1636,7 @@ export function SavingsGoalPlanner({
 
         <Link
           to="/buyers"
+          onClick={clearActiveBuyerSession}
           className="block mt-4 animate-fade-in"
           style={{ animationDelay: "240ms", animationFillMode: "backwards" }}
         >

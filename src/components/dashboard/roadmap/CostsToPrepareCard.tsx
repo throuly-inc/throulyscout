@@ -54,14 +54,16 @@ export function CostsToPrepareCard({ savingsGoal, savingsCurrent }: Props) {
         {items.map((item) => {
           const s = status(item);
           return (
-            <div key={item.key} className="flex items-center justify-between gap-2 border-b border-border/60 last:border-0 pb-2 last:pb-0">
-              <div className="min-w-0">
-                <div className="text-sm text-foreground truncate">{item.label}</div>
+            <div key={item.key} className="flex items-start justify-between gap-2 border-b border-border/60 last:border-0 pb-2 last:pb-0">
+              <div className="min-w-0 flex-1">
+                <div className="text-sm text-foreground">{item.label}</div>
                 <div className="text-[11px] text-muted-foreground">
                   Estimate {fmt(item.estimate)} · Saved {fmt(item.planned)}
                 </div>
               </div>
-              <Badge variant="secondary" className={`text-[10px] h-5 ${s.cls}`}>{s.label}</Badge>
+              <Badge variant="secondary" className={`text-[10px] h-5 shrink-0 whitespace-nowrap ${s.cls}`}>
+                {s.label}
+              </Badge>
             </div>
           );
         })}

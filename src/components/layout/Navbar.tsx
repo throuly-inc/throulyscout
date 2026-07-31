@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { PrivacyIndicator } from "@/components/privacy/PrivacyIndicator";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { clearBuyerSessionData } from "@/lib/buyerSessionStorage";
+import { clearBuyerSessionData, clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import throulyIcon from "@/assets/throuly-icon.png";
 import throulyLogo from "@/assets/throuly-logo.png";
 import {
@@ -115,6 +115,7 @@ export function Navbar() {
                   <div className="hidden md:flex items-center gap-0">
                     <Link
                       to="/buyers"
+                      onClick={clearActiveBuyerSession}
                       className={cn(
                         "relative px-4 py-5 transition-colors duration-200",
                         isActive("/buyers") ? "text-[#0c0e1a]" : "text-[#4a4d63] hover:text-[#0c0e1a]",
@@ -174,7 +175,7 @@ export function Navbar() {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link to="/buyers" className="w-full cursor-pointer">
+                        <Link to="/buyers" onClick={clearActiveBuyerSession} className="w-full cursor-pointer">
                           <Calculator className="w-4 h-4 mr-2" />
                           Buyer Calculator
                         </Link>
@@ -262,6 +263,7 @@ export function Navbar() {
                         <DropdownMenuItem key={link.href} asChild>
                           <Link
                             to={link.href}
+                            onClick={link.href === "/buyers" ? clearActiveBuyerSession : undefined}
                             className={cn(
                               "w-full cursor-pointer",
                               isActive(link.href) ? "font-semibold text-[#0c0e1a]" : "",
@@ -319,7 +321,12 @@ export function Navbar() {
                   >
                     Log In
                   </Link>
-                  <Link to={productCTA?.href || "/buyers"}>
+                  <Link
+                    to={productCTA?.href || "/buyers"}
+                    onClick={() => {
+                      if (!productCTA?.href || productCTA.href === "/buyers") clearActiveBuyerSession();
+                    }}
+                  >
                     <button
                       className="transition-all duration-200"
                       style={{
@@ -419,7 +426,10 @@ export function Navbar() {
               </Link>
               <Link
                 to="/buyers"
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  clearActiveBuyerSession();
+                  setIsOpen(false);
+                }}
                 className="flex items-center px-6 py-3.5 transition-colors duration-200"
                 style={{ fontSize: "0.8rem", fontWeight: 600, color: "#0c0e1a" }}
               >
@@ -467,7 +477,10 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   to={link.href}
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    if (link.href === "/buyers") clearActiveBuyerSession();
+                    setIsOpen(false);
+                  }}
                   className={cn(
                     "flex items-center px-6 py-3.5 transition-colors duration-200",
                     isActive(link.href) ? "font-medium" : "",
@@ -516,7 +529,10 @@ export function Navbar() {
                 </Link>
                 <Link
                   to="/buyers"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    clearActiveBuyerSession();
+                    setIsOpen(false);
+                  }}
                   className="block text-center font-semibold transition-all duration-200"
                   style={{
                     backgroundColor: "#0c0e1a",

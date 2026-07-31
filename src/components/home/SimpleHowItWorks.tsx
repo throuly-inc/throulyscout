@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ClipboardList, Calculator, Users, CheckCircle, ArrowRight } from "lucide-react";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 const phases = [
   { num: "01", title: "Discover", text: "Tell us about your buying goals." },
@@ -135,7 +136,7 @@ export function SimpleHowItWorks() {
 
         {/* CTA */}
         <div className="text-center">
-          <Link to="/buyers">
+          <Link to="/buyers" onClick={clearActiveBuyerSession}>
             <button
               className="transition-all duration-200"
               style={{

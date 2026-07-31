@@ -74,19 +74,17 @@ export default function HomebuyingResults() {
               {editing ? `Editing · ${editing.name}` : "Step 2 of 2 · Affordability results"}
             </p>
           </div>
-          <div data-sensitive="true">
-            <GenericResults
-              state={session.selectedState}
-              homePrice={session.homePrice}
-              hoaMonthly={session.hoaMonthly}
-              financialProfile={session.financialProfile}
-              loanTypeId={session.loanTypeId}
-              onBack={() => navigate("/homebuying-estimate/financial-health")}
-              onSave={handleSave}
-              editingScenarioId={editing?.id ?? null}
-              editingScenarioName={editing?.name ?? null}
-            />
-          </div>
+          <GenericResults
+            state={session.selectedState}
+            homePrice={session.homePrice}
+            hoaMonthly={session.hoaMonthly}
+            financialProfile={session.financialProfile}
+            loanTypeId={session.loanTypeId}
+            onBack={() => navigate("/homebuying-estimate/financial-health")}
+            onSave={handleSave}
+            editingScenarioId={editing?.id ?? null}
+            editingScenarioName={editing?.name ?? null}
+          />
         </div>
       </main>
       <Footer />

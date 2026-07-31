@@ -82,7 +82,15 @@ const Buyers = () => {
     return readSession();
   });
 
-  const [step, setStep] = useState<Step>("location");
+  // "?edit=1" means the user hit Back from a results/financial-health page to
+  // revisit their inputs — go straight to the full calculator step instead of
+  // bouncing forward to results again.
+  const editIntent =
+    typeof window !== "undefined" && !!new URLSearchParams(window.location.search).get("edit");
+
+  const [step, setStep] = useState<Step>(() =>
+    editIntent && restoredSession ? "full-calculator" : "location",
+  );
   const [loadingScenario, setLoadingScenario] = useState<boolean>(
     typeof window !== "undefined" && !!new URLSearchParams(window.location.search).get("scenario"),
   );
@@ -157,7 +165,7 @@ const Buyers = () => {
   }, []);
 
   useEffect(() => {
-    if (loadingScenario) return;
+    if (loadingScenario || (editIntent && restoredSession)) return;
     if (restoredSession) {
       // Clear any stale editing marker when resuming a plain session
       try {
@@ -183,7 +191,10 @@ const Buyers = () => {
   const [loanTypeId, setLoanTypeId] = useState<string>(
     prefill.loanTypeId ?? restoredSession?.loanTypeId ?? "conventional",
   );
-  const [returnToReview, setReturnToReview] = useState(0);
+  // Land directly on the "Review Your Details" step when re-entering via
+  // "?edit=1" (e.g. "Update my financial info"), instead of the first step
+  // of a brand-new calculation wizard.
+  const [returnToReview, setReturnToReview] = useState(editIntent && restoredSession ? 1 : 0);
   const [calcCount, setCalcCount] = useState(0);
   const [prelimYearlyIncome, setPrelimYearlyIncome] = useState<number>(
     restoredSession?.financialProfile?.yearlyIncome ?? 100000,

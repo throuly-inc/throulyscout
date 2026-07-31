@@ -5,6 +5,7 @@ import { DollarSign, TrendingUp, Target, CheckCircle2, Lightbulb } from "lucide-
 import { Link, useNavigate } from "react-router-dom";
 import { formatCurrency } from "@/lib/calculator";
 import { statesData } from "@/lib/states";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 interface Props {
   estimate: any | null;
@@ -37,6 +38,7 @@ export function FinancialHealthTrackers({ estimate, loading }: Props) {
 
   const goToResults = () => {
     if (!estimate) {
+      clearActiveBuyerSession();
       navigate("/buyers");
       return;
     }
@@ -74,7 +76,7 @@ export function FinancialHealthTrackers({ estimate, loading }: Props) {
           <CardContent className="py-8 text-center">
             <p className="text-sm text-muted-foreground">
               Complete the{" "}
-              <Link to="/buyers" className="text-accent underline underline-offset-4">
+              <Link to="/buyers" onClick={clearActiveBuyerSession} className="text-accent underline underline-offset-4">
                 Home Affordability Calculator
               </Link>{" "}
               to unlock your trackers.
