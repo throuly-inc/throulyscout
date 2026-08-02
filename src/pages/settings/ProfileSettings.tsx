@@ -19,17 +19,25 @@ export default function ProfileSettings() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const objectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || "");
       setPhone(profile.phone || "");
       setAvatarUrl(profile.avatar_url || null);
+      setPendingAvatarFile(null);
     }
   }, [profile]);
+
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    };
+  }, []);
 
   const dashboardPath = "/dashboard/client";
 
@@ -37,55 +45,57 @@ export default function ProfileSettings() {
     ? fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "U";
 
-  const handleUploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
 
-    setUploading(true);
-    try {
-      const ext = file.name.split(".").pop();
-      const filePath = `${user.id}/avatar.${ext}`;
+    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    const previewUrl = URL.createObjectURL(file);
+    objectUrlRef.current = previewUrl;
 
-      const { error: uploadError } = await supabase.storage
-        .from("throulyscout-avatars")
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: publicData } = supabase.storage
-        .from("throulyscout-avatars")
-        .getPublicUrl(filePath);
-
-      const publicUrl = publicData.publicUrl + `?t=${Date.now()}`;
-
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ avatar_url: publicUrl })
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
-
-      setAvatarUrl(publicUrl);
-      refetchProfile();
-      toast({ title: "Photo uploaded", description: "Your profile photo has been updated." });
-    } catch (err: any) {
-      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
-    } finally {
-      setUploading(false);
-    }
+    setPendingAvatarFile(file);
+    setAvatarUrl(previewUrl);
+    e.target.value = "";
   };
 
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
     try {
+      let newAvatarUrl: string | undefined;
+      if (pendingAvatarFile) {
+        const ext = pendingAvatarFile.name.split(".").pop();
+        const filePath = `${user.id}/avatar.${ext}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("throulyscout-avatars")
+          .upload(filePath, pendingAvatarFile, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicData } = supabase.storage
+          .from("throulyscout-avatars")
+          .getPublicUrl(filePath);
+
+        newAvatarUrl = publicData.publicUrl + `?t=${Date.now()}`;
+      }
+
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: fullName, phone: phone || null })
+        .update({
+          full_name: fullName,
+          phone: phone || null,
+          ...(newAvatarUrl ? { avatar_url: newAvatarUrl } : {}),
+        })
         .eq("id", user.id);
 
       if (error) throw error;
 
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
+      }
+      setPendingAvatarFile(null);
       refetchProfile();
       toast({ title: "Profile updated", description: "Your changes have been saved." });
     } catch (err: any) {
@@ -139,12 +149,14 @@ export default function ProfileSettings() {
                 <Button
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
                 >
                   <Camera className="w-4 h-4 mr-2" />
-                  {uploading ? "Uploading…" : "Upload Photo"}
+                  Upload Photo
                 </Button>
                 <p className="text-xs text-muted-foreground mt-1">JPG, PNG. Max 2MB.</p>
+                {pendingAvatarFile && (
+                  <p className="text-xs text-warning mt-1">Click "Save Changes" to keep this photo.</p>
+                )}
               </div>
             </div>
 
