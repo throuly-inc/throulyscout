@@ -59,7 +59,12 @@ export default function ClientDashboard() {
 
   const latestEstimate = fhDerivedEstimate || estimates[0] || null;
   const originalEstimate = !fhDerivedEstimate && estimates.length > 1 ? estimates[estimates.length - 1] : null;
-  const defaultEstimate = originalEstimate || latestEstimate;
+  // The Financial Health record auto-syncs on every calculator visit, even
+  // ones the user never explicitly saved. When real saved scenarios exist,
+  // default to the most recently *saved* one instead of silently surfacing
+  // whatever state the user last poked at out of curiosity.
+  const defaultEstimate =
+    originalEstimate || (fhDerivedEstimate && estimates.length > 0 ? estimates[0] : latestEstimate);
 
   // When the buyer has more than one saved calculator result, let them pick
   // which one drives the Estimate card, Savings Planner, and Programs tab —
@@ -129,8 +134,15 @@ export default function ClientDashboard() {
       .eq("user_id", user.id)
       .neq("scenario_name", "Financial Health Report")
       .order("created_at", { ascending: false })
-      .limit(5);
-    setEstimates((data as any[]) || []);
+      .limit(20);
+    // Market Analysis saves (from the Analyzer's "Save Analysis" button) have
+    // a different shape than a buyer-calculator estimate (no homePrice/
+    // results), so they don't belong in the dashboard's estimate switcher —
+    // including them produces a "$0" estimate if one happens to be newest.
+    const calculatorEstimates = ((data as any[]) || []).filter(
+      (e) => e.inputs?.type !== "market_analysis",
+    );
+    setEstimates(calculatorEstimates.slice(0, 5));
     setEstimateLoading(false);
   };
 
