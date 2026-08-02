@@ -46,6 +46,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   useSavingsProjection,
   computeSavingsProjection,
+  addMonths,
   type ExpenseRow,
   type ReadinessTargets,
 } from "@/hooks/useSavingsProjection";
@@ -107,9 +108,20 @@ interface NumberFieldProps {
   placeholder?: string;
   className?: string;
   min?: number;
+  max?: number;
   ariaLabel?: string;
   allowEmpty?: boolean;
 }
+
+const formatWithCommas = (s: string) => {
+  if (!s) return s;
+  const neg = s.startsWith("-");
+  const body = neg ? s.slice(1) : s;
+  const [intPart, decPart] = body.split(".");
+  const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return (neg ? "-" : "") + withCommas + (decPart !== undefined ? "." + decPart : "");
+};
+
 function NumberField({
   id,
   value,
@@ -117,11 +129,13 @@ function NumberField({
   placeholder,
   className,
   min = 0,
+  max,
   ariaLabel,
   allowEmpty = false,
 }: NumberFieldProps) {
   const [raw, setRaw] = useState<string>(value != null ? String(value) : "");
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
 
   useEffect(() => {
     const parsed = Number(raw);
@@ -137,22 +151,27 @@ function NumberField({
   }, [value]);
 
   const handle = (s: string) => {
-    setRaw(s);
-    if (s === "") {
+    const clean = s.replace(/,/g, "");
+    setRaw(clean);
+    if (clean === "") {
       setError(null);
+      setWarning(null);
       onChange(allowEmpty ? null : 0);
       return;
     }
-    const n = Number(s);
+    const n = Number(clean);
     if (Number.isNaN(n)) {
       setError("Enter a valid number");
+      setWarning(null);
       return;
     }
     if (n < min) {
       setError(`Must be ${min} or greater`);
+      setWarning(null);
       return;
     }
     setError(null);
+    setWarning(max != null && n > max ? "That's unusually high — double check?" : null);
     onChange(n);
   };
 
@@ -160,18 +179,17 @@ function NumberField({
     <div className="space-y-1">
       <Input
         id={id}
-        type="number"
+        type="text"
         inputMode="decimal"
         aria-label={ariaLabel}
         aria-invalid={!!error}
-        className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-          error ? "border-destructive focus-visible:ring-destructive" : ""
-        } ${className || ""}`}
-        value={raw}
+        className={`${error ? "border-destructive focus-visible:ring-destructive" : ""} ${className || ""}`}
+        value={formatWithCommas(raw)}
         onChange={(e) => handle(e.target.value)}
         placeholder={placeholder}
       />
       {error && <p className="text-[11px] text-destructive">{error}</p>}
+      {!error && warning && <p className="text-[11px] text-warning">{warning}</p>}
     </div>
   );
 }
@@ -1073,7 +1091,13 @@ export function SavingsGoalPlanner({
           <div className="rounded-md border border-accent/30 bg-accent/5 p-3 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
             <div>
               <p className="text-[11px] uppercase tracking-wider text-muted-foreground">New date</p>
-              <p className="font-semibold">{fmtDate(simProjection.projectedGoalDate)}</p>
+              <p className="font-semibold">
+                {fmtDate(
+                  simProjection.projectedGoalDate
+                    ? addMonths(simProjection.projectedGoalDate, sim.monthsDelta)
+                    : simProjection.projectedGoalDate,
+                )}
+              </p>
             </div>
             <div>
               <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -1257,6 +1281,7 @@ export function SavingsGoalPlanner({
               }
               placeholder="0"
               allowEmpty
+              max={1_000_000}
             />
           </div>
           <div className="space-y-1.5">
