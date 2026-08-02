@@ -673,11 +673,14 @@ export function GenericResults({
     try {
       const { data: existing } = await supabase
         .from("saved_scenarios" as any)
-        .select("id")
+        .select("id, inputs")
         .eq("user_id", user.id)
         .neq("scenario_name", "Financial Health Report")
         .not("scenario_name", "ilike", "%Auto-saved%");
-      if ((existing || []).length >= 5) {
+      const existingCalculatorScenarios = (existing || []).filter(
+        (row: any) => row.inputs?.type !== "market_analysis",
+      );
+      if (existingCalculatorScenarios.length >= 5) {
         toast({
           title: "Save limit reached",
           description: "You already have 5 saved scenarios. Delete one from your dashboard to make room.",
@@ -779,13 +782,16 @@ export function GenericResults({
 
       const { data: existing } = await supabase
         .from("saved_scenarios" as any)
-        .select("id")
+        .select("id, inputs")
         .eq("user_id", user.id)
         .neq("scenario_name", "Financial Health Report")
         .not("scenario_name", "ilike", "%Auto-saved%");
 
-      // Count check — enforce 5-scenario cap (excludes auto-saved estimates)
-      if ((existing || []).length >= 5) {
+      // Count check — enforce 5-scenario cap (excludes auto-saved estimates and Market Analysis saves)
+      const existingCalculatorScenarios = (existing || []).filter(
+        (row: any) => row.inputs?.type !== "market_analysis",
+      );
+      if (existingCalculatorScenarios.length >= 5) {
         toast({
           title: "Save limit reached",
           description: "You already have 5 saved scenarios. Delete one from your dashboard to make room.",

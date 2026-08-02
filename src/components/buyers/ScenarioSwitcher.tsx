@@ -130,10 +130,16 @@ export function ScenarioSwitcher({ currentInputs, currentSnapshot, onLoad, userI
       .eq("user_id", uid)
       .neq("scenario_name", "Financial Health Report")
       .order("created_at", { ascending: false })
-      .limit(5);
+      .limit(20);
+    // Market Analysis saves (from the Analyzer's "Save Analysis" button) have
+    // a different shape than a buyer-calculator scenario (no homePrice/
+    // results), so they don't belong in this switcher — they'd show as a
+    // scenario with $0 everywhere.
     const mapped = ((data as any[]) || [])
+      .filter((row) => row.inputs?.type !== "market_analysis")
       .map(mapDbRowToScenario)
-      .filter((s): s is BuyerScenario => Boolean(s));
+      .filter((s): s is BuyerScenario => Boolean(s))
+      .slice(0, 5);
     setScenarios(mapped);
   };
 
