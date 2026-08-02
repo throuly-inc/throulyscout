@@ -10,6 +10,7 @@ import {
   Settings,
   Calculator,
   BookOpen,
+  HelpCircle,
   Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -111,8 +112,8 @@ export function Navbar() {
                   </span>
                 </Link>
 
-                {!location.pathname.startsWith("/dashboard") && (
-                  <div className="hidden md:flex items-center gap-0">
+                <div className="hidden md:flex items-center gap-0">
+                  {!location.pathname.startsWith("/dashboard") && (
                     <Link
                       to="/buyers"
                       onClick={clearActiveBuyerSession}
@@ -124,8 +125,21 @@ export function Navbar() {
                     >
                       Buyer Calculator
                     </Link>
-                  </div>
-                )}
+                  )}
+                  {standaloneLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      className={cn(
+                        "relative px-4 py-5 transition-colors duration-200",
+                        isActive(link.href) ? "text-[#0c0e1a]" : "text-[#4a4d63] hover:text-[#0c0e1a]",
+                      )}
+                      style={{ fontSize: "0.8rem", fontWeight: 600 }}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
 
               {/* Right: Profile dropdown (desktop) + Hamburger (mobile) */}
@@ -184,6 +198,12 @@ export function Navbar() {
                         <Link to="/analyzer" className="w-full cursor-pointer">
                           <Search className="w-4 h-4 mr-2" />
                           Analyzer
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/how-it-works" className="w-full cursor-pointer">
+                          <HelpCircle className="w-4 h-4 mr-2" />
+                          How it works
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
@@ -444,6 +464,15 @@ export function Navbar() {
               >
                 <Search className="w-4 h-4 mr-2" />
                 Analyzer
+              </Link>
+              <Link
+                to="/how-it-works"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center px-6 py-3.5 transition-colors duration-200"
+                style={{ fontSize: "0.8rem", fontWeight: 600, color: "#0c0e1a" }}
+              >
+                <HelpCircle className="w-4 h-4 mr-2" />
+                How it works
               </Link>
               <Link
                 to="/resources"
