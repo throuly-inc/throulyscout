@@ -186,6 +186,7 @@ function NumberField({
         className={`${error ? "border-destructive focus-visible:ring-destructive" : ""} ${className || ""}`}
         value={formatWithCommas(raw)}
         onChange={(e) => handle(e.target.value)}
+        onFocus={(e) => e.target.select()}
         placeholder={placeholder}
       />
       {error && <p className="text-[11px] text-destructive">{error}</p>}
@@ -1208,31 +1209,37 @@ export function SavingsGoalPlanner({
                   {item.target > 0 && <>of {formatCurrency(item.target)}</>}
                 </span>
                 {i > 0 && (
-                  <div className="flex items-center gap-1">
-                    <NumberField
-                      value={item.target}
-                      onChange={(n) =>
-                        setMeta((m) => ({
-                          ...m,
-                          readiness: { ...m.readiness, [item.key]: n ?? 0 },
-                        }))
-                      }
-                      placeholder="Target"
-                      className="h-7 w-20 text-xs"
-                      ariaLabel={`${item.label} target`}
-                    />
-                    <NumberField
-                      value={item.saved}
-                      onChange={(n) =>
-                        setMeta((m) => ({
-                          ...m,
-                          readiness: { ...m.readiness, [item.savedKey]: n ?? 0 },
-                        }))
-                      }
-                      placeholder="Saved"
-                      className="h-7 w-20 text-xs"
-                      ariaLabel={`${item.label} saved`}
-                    />
+                  <div className="flex items-end gap-1">
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] text-muted-foreground text-center">Target</p>
+                      <NumberField
+                        value={item.target}
+                        onChange={(n) =>
+                          setMeta((m) => ({
+                            ...m,
+                            readiness: { ...m.readiness, [item.key]: n ?? 0 },
+                          }))
+                        }
+                        placeholder="Target"
+                        className="h-7 w-20 text-xs"
+                        ariaLabel={`${item.label} target`}
+                      />
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] text-muted-foreground text-center">Saved</p>
+                      <NumberField
+                        value={item.saved}
+                        onChange={(n) =>
+                          setMeta((m) => ({
+                            ...m,
+                            readiness: { ...m.readiness, [item.savedKey]: n ?? 0 },
+                          }))
+                        }
+                        placeholder="Saved"
+                        className="h-7 w-20 text-xs"
+                        ariaLabel={`${item.label} saved`}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
