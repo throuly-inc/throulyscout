@@ -174,7 +174,7 @@ function SectionHeader({
 export default function HomebuyingFinancialHealth() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { guardSave } = usePrivacy();
+  const { guardSave, isPrivateMode } = usePrivacy();
   const { user } = useAuth();
   const session = useMemo(readSession, []);
   const [savedSnapshotInputs, setSavedSnapshotInputs] = useState<string | null>(null);
@@ -392,16 +392,17 @@ export default function HomebuyingFinancialHealth() {
   };
 
   // Auto-sync: whenever inputs change, upsert after a short debounce so the
-  // dashboard and results page always see the latest numbers.
+  // dashboard and results page always see the latest numbers. Skipped while
+  // Private Mode is on — nothing should be written to the account silently.
   useEffect(() => {
-    if (!user || !currentInputsKey || !baseReport) return;
+    if (!user || !currentInputsKey || !baseReport || isPrivateMode) return;
     if (savedSnapshotInputs === currentInputsKey) return;
     const t = window.setTimeout(() => {
       void persistFinancialHealth();
     }, 800);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, currentInputsKey, savedRowId]);
+  }, [user, currentInputsKey, savedRowId, isPrivateMode]);
 
   const handleSaveAndViewResults = async () => {
     if (!guardSave("save your financial health report")) return;

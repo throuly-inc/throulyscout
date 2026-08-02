@@ -771,7 +771,7 @@ export function AddressChat({ onBeforeSubmit }: AddressChatProps = {}) {
             <>
               <Link to="/dashboard/client">
                 <Button variant="ghost" size="sm" className="text-foreground hover:text-foreground -ml-2">
-                  <ArrowLeft className="w-4 h-4 mr-1" /> Dashboard
+                  <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
                 </Button>
               </Link>
               <Link to="/dashboard/client/saved-analyses">

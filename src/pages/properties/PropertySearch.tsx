@@ -91,14 +91,16 @@ export default function PropertySearch() {
       <Navbar />
       <div className="pt-20 pb-12 px-4">
         <div className="max-w-7xl mx-auto space-y-6">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <h1 className="font-serif text-3xl text-foreground">Find Properties</h1>
-            <Button variant="outline" size="sm" asChild>
-              <Link to={dashboardHref}>
+          <div>
+            <Link to={dashboardHref}>
+              <Button variant="ghost" size="sm" className="-ml-2">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Dashboard
-              </Link>
-            </Button>
+              </Button>
+            </Link>
+          </div>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <h1 className="font-serif text-3xl text-foreground">Find Properties</h1>
           </div>
 
           {/* Filter Bar */}

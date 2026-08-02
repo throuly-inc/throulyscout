@@ -124,7 +124,7 @@ export default function ClientPreferences() {
     <div className="min-h-screen bg-background">
       <header className="h-14 border-b flex items-center px-6 justify-between">
         <Link to="/dashboard/client">
-          <Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back to Dashboard</Button>
+          <Button variant="ghost" size="sm" className="-ml-2"><ArrowLeft className="w-4 h-4 mr-2" />Back to Dashboard</Button>
         </Link>
         <h1 className="font-serif text-xl text-foreground">My Preferences</h1>
         <div />
