@@ -1,409 +1,397 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://throuly.com/</loc>
+    <loc>https://throulyscout.com/</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://throuly.com/welcome</loc>
+    <loc>https://throulyscout.com/welcome</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://throuly.com/scout</loc>
+    <loc>https://throulyscout.com/scout</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://throuly.com/list</loc>
+    <loc>https://throulyscout.com/how-it-works</loc>
+    <lastmod>2026-07-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://throulyscout.com/trust</loc>
+    <lastmod>2026-07-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://throulyscout.com/buyers</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://throuly.com/compass</loc>
-    <lastmod>2026-07-10</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://throuly.com/buyers</loc>
-    <lastmod>2026-07-10</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://throuly.com/buyers/programs</loc>
+    <loc>https://throulyscout.com/buyers/programs</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://throuly.com/analyzer</loc>
+    <loc>https://throulyscout.com/analyzer</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://throuly.com/properties/search</loc>
+    <loc>https://throulyscout.com/properties/search</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://throuly.com/auth</loc>
-    <lastmod>2026-07-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://throuly.com/saved</loc>
-    <lastmod>2026-07-10</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://throuly.com/resources</loc>
+    <loc>https://throulyscout.com/resources</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://throuly.com/news</loc>
+    <loc>https://throulyscout.com/news</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://throuly.com/try-it-free</loc>
+    <loc>https://throulyscout.com/try-it-free</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/buyers</loc>
+    <loc>https://throulyscout.com/guides/buyers</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/sellers</loc>
-    <lastmod>2026-07-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://throuly.com/guides/investors</loc>
+    <loc>https://throulyscout.com/guides/investors</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/realistic-affordability</loc>
+    <loc>https://throulyscout.com/guides/realistic-affordability</loc>
     <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/al</loc>
+    <loc>https://throulyscout.com/guides/smart-buyer-strategies</loc>
+    <lastmod>2026-07-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://throulyscout.com/guides/programs/al</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ak</loc>
+    <loc>https://throulyscout.com/guides/programs/ak</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/az</loc>
+    <loc>https://throulyscout.com/guides/programs/az</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ar</loc>
+    <loc>https://throulyscout.com/guides/programs/ar</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ca</loc>
+    <loc>https://throulyscout.com/guides/programs/ca</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/co</loc>
+    <loc>https://throulyscout.com/guides/programs/co</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ct</loc>
+    <loc>https://throulyscout.com/guides/programs/ct</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/de</loc>
+    <loc>https://throulyscout.com/guides/programs/de</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/fl</loc>
+    <loc>https://throulyscout.com/guides/programs/fl</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ga</loc>
+    <loc>https://throulyscout.com/guides/programs/ga</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/hi</loc>
+    <loc>https://throulyscout.com/guides/programs/hi</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/id</loc>
+    <loc>https://throulyscout.com/guides/programs/id</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/il</loc>
+    <loc>https://throulyscout.com/guides/programs/il</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/in</loc>
+    <loc>https://throulyscout.com/guides/programs/in</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ia</loc>
+    <loc>https://throulyscout.com/guides/programs/ia</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ks</loc>
+    <loc>https://throulyscout.com/guides/programs/ks</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ky</loc>
+    <loc>https://throulyscout.com/guides/programs/ky</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/la</loc>
+    <loc>https://throulyscout.com/guides/programs/la</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/me</loc>
+    <loc>https://throulyscout.com/guides/programs/me</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/md</loc>
+    <loc>https://throulyscout.com/guides/programs/md</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ma</loc>
+    <loc>https://throulyscout.com/guides/programs/ma</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/mi</loc>
+    <loc>https://throulyscout.com/guides/programs/mi</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/mn</loc>
+    <loc>https://throulyscout.com/guides/programs/mn</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ms</loc>
+    <loc>https://throulyscout.com/guides/programs/ms</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/mo</loc>
+    <loc>https://throulyscout.com/guides/programs/mo</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/mt</loc>
+    <loc>https://throulyscout.com/guides/programs/mt</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ne</loc>
+    <loc>https://throulyscout.com/guides/programs/ne</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/nv</loc>
+    <loc>https://throulyscout.com/guides/programs/nv</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/nh</loc>
+    <loc>https://throulyscout.com/guides/programs/nh</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/nj</loc>
+    <loc>https://throulyscout.com/guides/programs/nj</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/nm</loc>
+    <loc>https://throulyscout.com/guides/programs/nm</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ny</loc>
+    <loc>https://throulyscout.com/guides/programs/ny</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/nc</loc>
+    <loc>https://throulyscout.com/guides/programs/nc</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/nd</loc>
+    <loc>https://throulyscout.com/guides/programs/nd</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/oh</loc>
+    <loc>https://throulyscout.com/guides/programs/oh</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ok</loc>
+    <loc>https://throulyscout.com/guides/programs/ok</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/or</loc>
+    <loc>https://throulyscout.com/guides/programs/or</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/pa</loc>
+    <loc>https://throulyscout.com/guides/programs/pa</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ri</loc>
+    <loc>https://throulyscout.com/guides/programs/ri</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/sc</loc>
+    <loc>https://throulyscout.com/guides/programs/sc</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/sd</loc>
+    <loc>https://throulyscout.com/guides/programs/sd</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/tn</loc>
+    <loc>https://throulyscout.com/guides/programs/tn</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/tx</loc>
+    <loc>https://throulyscout.com/guides/programs/tx</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/ut</loc>
+    <loc>https://throulyscout.com/guides/programs/ut</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/vt</loc>
+    <loc>https://throulyscout.com/guides/programs/vt</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/va</loc>
+    <loc>https://throulyscout.com/guides/programs/va</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/wa</loc>
+    <loc>https://throulyscout.com/guides/programs/wa</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/wv</loc>
+    <loc>https://throulyscout.com/guides/programs/wv</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/wi</loc>
+    <loc>https://throulyscout.com/guides/programs/wi</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://throuly.com/guides/programs/wy</loc>
+    <loc>https://throulyscout.com/guides/programs/wy</loc>
     <lastmod>2026-07-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

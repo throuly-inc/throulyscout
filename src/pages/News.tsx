@@ -185,21 +185,21 @@ const News = () => {
             name: "throuly Newsroom",
             description:
               "News, data and perspectives on private homebuying from the throuly team.",
-            url: "https://throuly.com/news",
+            url: "https://throulyscout.com/news",
             publisher: {
               "@type": "Organization",
               name: "throuly",
               logo: {
                 "@type": "ImageObject",
-                url: "https://throuly.com/favicon.png",
+                url: "https://throulyscout.com/favicon-v2.png",
               },
             },
             blogPost: [...FEATURED, ...RESEARCH].map((a) => ({
               "@type": "BlogPosting",
               headline: a.title,
               description: a.excerpt,
-              url: `https://throuly.com${a.href}`,
-              image: `https://throuly.com${a.image}`,
+              url: `https://throulyscout.com${a.href}`,
+              image: `https://throulyscout.com${a.image}`,
               author: { "@type": "Organization", name: "The throuly Team" },
             })),
           },
@@ -207,8 +207,8 @@ const News = () => {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Home", item: "https://throuly.com/" },
-              { "@type": "ListItem", position: 2, name: "Newsroom", item: "https://throuly.com/news" },
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://throulyscout.com/" },
+              { "@type": "ListItem", position: 2, name: "Newsroom", item: "https://throulyscout.com/news" },
             ],
           },
         ]}

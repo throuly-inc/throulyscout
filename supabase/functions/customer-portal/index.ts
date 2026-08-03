@@ -51,14 +51,17 @@ serve(async (req) => {
     logStep("Found Stripe customer", { customerId });
 
     const ALLOWED_ORIGINS = new Set([
+      "https://throulyscout.com",
+      "https://www.throulyscout.com",
       "https://throuly.com",
       "https://www.throuly.com",
-      "https://throuly.lovable.app",
+      "https://throulyscout-staging.netlify.app",
+      "https://throulyscout.netlify.app",
     ]);
     const requestOrigin = req.headers.get("origin") ?? "";
     const origin = ALLOWED_ORIGINS.has(requestOrigin)
       ? requestOrigin
-      : "https://throuly.com";
+      : "https://throulyscout.com";
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${origin}/pricing`,

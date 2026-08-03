@@ -67,7 +67,9 @@ const Auth = () => {
       return;
     }
 
-    if (returnTo && returnTo.startsWith("/")) {
+    // Only allow same-origin paths: reject protocol-relative ("//evil.com")
+    // and backslash variants that some browsers normalize to "//".
+    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("\\")) {
       navigate(returnTo);
       return;
     }

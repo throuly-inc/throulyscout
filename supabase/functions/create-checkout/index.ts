@@ -75,14 +75,17 @@ serve(async (req) => {
     // Restrict redirect origin to a hardcoded allow-list to prevent
     // attacker-supplied Origin headers from redirecting victims off-site.
     const ALLOWED_ORIGINS = new Set([
+      "https://throulyscout.com",
+      "https://www.throulyscout.com",
       "https://throuly.com",
       "https://www.throuly.com",
-      "https://throuly.lovable.app",
+      "https://throulyscout-staging.netlify.app",
+      "https://throulyscout.netlify.app",
     ]);
     const requestOrigin = req.headers.get("origin") ?? "";
     const origin = ALLOWED_ORIGINS.has(requestOrigin)
       ? requestOrigin
-      : "https://throuly.com";
+      : "https://throulyscout.com";
     
     const sessionConfig: any = {
       line_items: [{ price: priceId, quantity: 1 }],

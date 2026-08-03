@@ -108,13 +108,37 @@ Browser e2e tests live in `tests/e2e/` (Python + Playwright against a running de
 
 ## Deployment
 
-Netlify builds from this repo on every push to `main`:
+There are two Netlify sites, each paired with its own Supabase project:
+
+| Environment | Netlify site          | URL                                     | Supabase project |
+| ----------- | --------------------- | --------------------------------------- | ---------------- |
+| Staging     | `throulyscout-staging` | https://throulyscout-staging.netlify.app | staging project  |
+| Production  | `throulyscout`         | throulyscout.com (via Netlify)           | production project |
+
+For both sites:
 
 - Build settings come from `netlify.toml` (`npm run build`, publishes `dist/`, SPA fallback redirect).
 - Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the Netlify site's environment variables, pointing at the Supabase project for that environment.
 - Add the deployed URL to that Supabase project's Auth Redirect URLs.
 
-Database and edge functions deploy separately via the Supabase CLI (`supabase db push`, `supabase functions deploy`).
+**Staging** deploys automatically: the `throulyscout-staging` site is connected to this repo via Netlify's Git integration and builds on every merge to `main`. The local repo is also linked to the staging site, so a manual `netlify deploy --prod` from a laptop publishes to staging too.
+
+**Production** deploys only on version tags, via the GitHub Actions workflow in `.github/workflows/deploy-prod.yml`. To release:
+
+```sh
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+or publish a GitHub Release (which pushes the tag). The workflow builds the tagged commit and deploys it to the `throulyscout` Netlify site. It requires a `NETLIFY_AUTH_TOKEN` secret in the GitHub repo settings (create a personal access token in Netlify under User settings → Applications).
+
+For an emergency manual production deploy from a laptop:
+
+```sh
+netlify deploy --prod --site throulyscout
+```
+
+Database and edge functions deploy separately via the Supabase CLI (`supabase db push`, `supabase functions deploy`), each linked to the matching Supabase project.
 
 ## Project structure
 

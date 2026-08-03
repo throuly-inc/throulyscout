@@ -33,8 +33,8 @@ const RealisticAffordability = () => {
             description: "A privacy-first, lifestyle-based method for sizing up a home budget — different from a lender's pre-approval ceiling.",
             datePublished: "2026-06-20",
             author: { "@type": "Organization", name: "The throuly Team" },
-            publisher: { "@type": "Organization", name: "throuly", logo: { "@type": "ImageObject", url: "https://throuly.com/favicon.png" } },
-            mainEntityOfPage: "https://throuly.com/guides/realistic-affordability",
+            publisher: { "@type": "Organization", name: "throuly", logo: { "@type": "ImageObject", url: "https://throulyscout.com/favicon-v2.png" } },
+            mainEntityOfPage: "https://throulyscout.com/guides/realistic-affordability",
           },
           {
             "@context": "https://schema.org",

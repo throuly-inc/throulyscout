@@ -69,8 +69,8 @@ export const StateProgramsGuide = () => {
           description,
           datePublished: published,
           author: { "@type": "Organization", name: "The throuly Team" },
-          publisher: { "@type": "Organization", name: "throuly", logo: { "@type": "ImageObject", url: "https://throuly.com/favicon.png" } },
-          mainEntityOfPage: `https://throuly.com${path}`,
+          publisher: { "@type": "Organization", name: "throuly", logo: { "@type": "ImageObject", url: "https://throulyscout.com/favicon-v2.png" } },
+          mainEntityOfPage: `https://throulyscout.com${path}`,
         }}
       />
       <Navbar />
