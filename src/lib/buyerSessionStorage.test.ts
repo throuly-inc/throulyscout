@@ -53,16 +53,16 @@ beforeEach(() => {
 });
 
 describe("clearActiveBuyerSession", () => {
-  it("removes only the in-progress calculator keys from sessionStorage", () => {
+  it("removes only the in-progress calculator keys", () => {
     clearActiveBuyerSession();
     expect(fakeSession.getItem("throuly_buyers_session")).toBeNull();
     expect(fakeSession.getItem("throuly_editing_scenario")).toBeNull();
-    expect(fakeSession.getItem("throuly_pending_save")).toBeNull();
+    // Pending save lives in localStorage (written by GenericResults pre-auth)
+    expect(fakeLocal.getItem("throuly_pending_save")).toBeNull();
     // Longer-lived flags survive
-    expect(fakeSession.getItem("throuly_programs_prompt_seen")).toBe("x");
-    expect(fakeSession.getItem("throuly_financial_health_intro_seen")).toBe("x");
-    // localStorage untouched
-    for (const k of BUYER_LOCAL_STORAGE_KEYS) expect(fakeLocal.getItem(k)).toBe("x");
+    expect(fakeLocal.getItem("throuly_programs_prompt_seen")).toBe("x");
+    expect(fakeLocal.getItem("throuly_financial_health_intro_seen")).toBe("x");
+    expect(fakeLocal.getItem("throuly_saved_scenarios")).toBe("x");
   });
 });
 

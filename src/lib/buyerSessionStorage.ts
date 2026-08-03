@@ -5,15 +5,19 @@
 export const BUYER_SESSION_STORAGE_KEYS = [
   "throuly_buyers_session",
   "throuly_editing_scenario",
-  "throuly_pending_save",
-  "throuly_programs_prompt_seen",
-  "throuly_financial_health_intro_seen",
 ] as const;
 
 export const BUYER_LOCAL_STORAGE_KEYS = [
   "throuly_saved_scenarios",
   "throuly_savings_goal_planner",
   "throuly_home_purchase_planner",
+  // These three are written to localStorage (see GenericResults, Auth,
+  // FinancialHealthIntroModal) — they were previously mislisted as
+  // sessionStorage keys, so logout never actually cleared them and a
+  // pending save could leak into the next signed-in account.
+  "throuly_pending_save",
+  "throuly_programs_prompt_seen",
+  "throuly_financial_health_intro_seen",
 ] as const;
 
 /**
@@ -28,7 +32,7 @@ export function clearActiveBuyerSession() {
   try {
     sessionStorage.removeItem("throuly_buyers_session");
     sessionStorage.removeItem("throuly_editing_scenario");
-    sessionStorage.removeItem("throuly_pending_save");
+    localStorage.removeItem("throuly_pending_save");
   } catch {
     /* ignore */
   }
