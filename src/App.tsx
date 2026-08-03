@@ -37,6 +37,8 @@ import ClientSavedAnalyses from "./pages/dashboards/ClientSavedAnalyses";
 import ProfileSettings from "./pages/settings/ProfileSettings";
 import AccountSettings from "./pages/settings/AccountSettings";
 import Trust from "./pages/Trust";
+import Pricing from "./pages/Pricing";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import { AIChatBot } from "./components/chat/AIChatBot";
 import { GuidedTour } from "./components/onboarding/GuidedTour";
 
@@ -137,6 +139,8 @@ const App = () => (
 
                 {/* Trust & security */}
                 <Route path="/trust" element={<Trust />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
 
                 {/* Property pages */}
                 <Route path="/properties/search" element={<PropertySearch />} />

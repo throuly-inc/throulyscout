@@ -37,7 +37,7 @@ const PaymentSuccess = () => {
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/">
+              <Link to="/dashboard">
                 <Button variant="hero" size="lg">
                   <Home className="w-4 h-4 mr-2" />
                   Go to Dashboard
