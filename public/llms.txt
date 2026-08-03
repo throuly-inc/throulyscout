@@ -1,31 +1,32 @@
-# throuly
+# Throuly Scout
 
-> Real estate transactions reimagined — affordability tools, property search, and agent collaboration in one private, privacy-first platform serving all 50 US states.
+> Privacy-first homebuying tools — affordability calculators, financial health scoring, property analysis, and assistance program discovery across all 50 US states.
 
-throuly helps buyers, sellers, and agents navigate the real estate process end to end: calculating affordability, comparing loan options, analyzing properties, finding qualifying assistance programs, and managing deals through a transparent pipeline.
+Throuly Scout helps homebuyers navigate the purchase process end to end: calculating what they can truly afford, scoring their financial readiness, analyzing properties and markets with AI, and finding down-payment assistance and first-time buyer programs.
 
 ## Pages
 
-- [Home](/): Overview of throuly's Scout (buyers), List (sellers), and Compass (agents) journeys.
+- [Home](/): Overview of Throuly Scout and its buyer tools.
 - [Buyers](/buyers): Step-by-step home affordability calculator across all 50 states with DTI-based loan options.
+- [Financial Health](/homebuying-estimate/financial-health): Composite financial readiness score with factor-by-factor guidance.
 - [Assistance Programs](/buyers/programs): AI-generated down-payment assistance and first-time buyer grants.
-- [Sellers](/sellers): Seller planning tools, repair estimates, mortgage payoff, and FSBO vs agent comparison.
-- [Scout](/scout): Buyer product overview — search, match, and underwrite properties privately.
-- [Compass](/compass): Agent product overview — CRM, pipeline, offers, and client collaboration.
-- [List](/list): Seller product overview — listing prep, exposure, and offer management.
+- [Scout](/scout): Product overview — search, match, and underwrite properties privately.
+- [How It Works](/how-it-works): The Throuly Scout process from estimate to purchase.
 - [Analyzer](/analyzer): AI-powered address and property analysis with market intelligence.
 - [Property Search](/properties/search): Search active listings across the platform.
 - [Resources](/resources): Educational articles, calculators, and market guides.
-- [Connect Agents](/connect/agents): Directory of verified real estate agents by state.
-- [Connect Lenders](/connect/lenders): Directory of verified lenders by state.
-- [Try it Free](/try-it-free): Free access to core throuly tools.
+- [News](/news): Product updates and market news.
+- [Trust](/trust): Privacy and data-handling practices.
+- [Try it Free](/try-it-free): Free access to core Throuly Scout tools.
 
 ## Guides
 
 - [Buyers Guide](/guides/buyers): How to prepare, qualify, and close as a homebuyer.
-- [Sellers Guide](/guides/sellers): How to price, prepare, and market a home for sale.
 - [Investors Guide](/guides/investors): Rental yield, NOI, cap rate, and cash-on-cash analysis.
+- [Realistic Affordability](/guides/realistic-affordability): Why 28% front-end DTI beats lender maximums.
+- [Smart Buyer Strategies](/guides/smart-buyer-strategies): Negotiation and timing tactics for buyers.
+- [State Programs](/guides/programs/tx): State-specific first-time buyer program guides (all 50 states).
 
 ## Optional
 
-- [Sign in](/auth): Account access for buyers, sellers, and agents.
+- [Sign in](/auth): Account access for buyers.
