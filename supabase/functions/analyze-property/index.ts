@@ -28,13 +28,8 @@ serve(async (req) => {
       );
     }
 
-    // Authenticate user
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
-
+    // Authenticate user with the anon key + caller's JWT — no service-role
+    // privileges are needed anywhere in this function.
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(
@@ -43,8 +38,14 @@ serve(async (req) => {
       );
     }
 
+    const userClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    const { data: userData, error: userError } = await userClient.auth.getUser(token);
     if (userError || !userData.user) {
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid authentication' }),
@@ -55,12 +56,6 @@ serve(async (req) => {
     logStep("User authenticated", { userId: userData.user.id });
 
     // Server-enforced monthly quota (free: 3, premium: 100, pro/team: unlimited).
-    // Note: this function uses the service role client; impersonate user for the RPC.
-    const userClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } } }
-    );
     const { data: quota, error: quotaErr } = await userClient.rpc("consume_usage", { _feature: "property_analysis" });
     if (quotaErr) {
       return new Response(

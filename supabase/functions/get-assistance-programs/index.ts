@@ -27,12 +27,32 @@ serve(async (req) => {
     const sb = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } },
     );
     const { data: userData, error: userErr } = await sb.auth.getUser(authHeader.replace("Bearer ", ""));
     if (userErr || !userData.user) {
       return new Response(JSON.stringify({ success: false, error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Server-enforced monthly quota (free: 10, premium: 200, pro/team: unlimited).
+    // Every other AI endpoint enforces one; without it this is unlimited spend.
+    const { data: quota, error: quotaErr } = await sb.rpc("consume_usage", { _feature: "assistance_programs" });
+    if (quotaErr) {
+      return new Response(JSON.stringify({ success: false, error: "Quota check failed" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (quota && (quota as any).allowed === false) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: `Monthly assistance program lookup limit reached (${(quota as any).used}/${(quota as any).limit}). Upgrade for more.`,
+          quota,
+        }),
+        { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     logStep("Function started");
