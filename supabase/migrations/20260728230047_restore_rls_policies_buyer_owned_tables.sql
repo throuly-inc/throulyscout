@@ -4,63 +4,61 @@
 -- enabled with zero policies, so every insert/select/update/delete has been
 -- denied for regular users ever since. Restore simple owner-scoped policies,
 -- matching the pattern already in place on saved_scenarios.
+--
+-- NOTE: the `throulyscout` schema only exists on the production project (the
+-- app tables were moved there outside migration history). On fresh databases
+-- built from this repo's migrations the schema doesn't exist, so skip
+-- gracefully instead of failing the whole push. Policies are also dropped
+-- before creation so the migration can be re-applied safely.
 
--- buyer_questionnaires
-CREATE POLICY "Users can view own buyer questionnaire" ON throulyscout.buyer_questionnaires
-  FOR SELECT TO authenticated
-  USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own buyer questionnaire" ON throulyscout.buyer_questionnaires
-  FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own buyer questionnaire" ON throulyscout.buyer_questionnaires
-  FOR UPDATE TO authenticated
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can delete own buyer questionnaire" ON throulyscout.buyer_questionnaires
-  FOR DELETE TO authenticated
-  USING (auth.uid() = user_id);
+DO $$
+DECLARE
+  t text;
+  tables text[] := ARRAY[
+    'buyer_questionnaires',
+    'saved_searches',
+    'saved_results',
+    'user_financial_profiles'
+  ];
+  labels text[] := ARRAY[
+    'buyer questionnaire',
+    'saved searches',
+    'saved results',
+    'financial profile'
+  ];
+  label text;
+  i int;
+BEGIN
+  IF to_regnamespace('throulyscout') IS NULL THEN
+    RAISE NOTICE 'Schema throulyscout does not exist; skipping RLS policy restore';
+    RETURN;
+  END IF;
 
--- saved_searches
-CREATE POLICY "Users can view own saved searches" ON throulyscout.saved_searches
-  FOR SELECT TO authenticated
-  USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own saved searches" ON throulyscout.saved_searches
-  FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own saved searches" ON throulyscout.saved_searches
-  FOR UPDATE TO authenticated
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can delete own saved searches" ON throulyscout.saved_searches
-  FOR DELETE TO authenticated
-  USING (auth.uid() = user_id);
+  FOR i IN 1..array_length(tables, 1) LOOP
+    t := tables[i];
+    label := labels[i];
 
--- saved_results
-CREATE POLICY "Users can view own saved results" ON throulyscout.saved_results
-  FOR SELECT TO authenticated
-  USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own saved results" ON throulyscout.saved_results
-  FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own saved results" ON throulyscout.saved_results
-  FOR UPDATE TO authenticated
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can delete own saved results" ON throulyscout.saved_results
-  FOR DELETE TO authenticated
-  USING (auth.uid() = user_id);
+    IF to_regclass('throulyscout.' || t) IS NULL THEN
+      RAISE NOTICE 'Table throulyscout.% does not exist; skipping', t;
+      CONTINUE;
+    END IF;
 
--- user_financial_profiles
-CREATE POLICY "Users can view own financial profile" ON throulyscout.user_financial_profiles
-  FOR SELECT TO authenticated
-  USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own financial profile" ON throulyscout.user_financial_profiles
-  FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own financial profile" ON throulyscout.user_financial_profiles
-  FOR UPDATE TO authenticated
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can delete own financial profile" ON throulyscout.user_financial_profiles
-  FOR DELETE TO authenticated
-  USING (auth.uid() = user_id);
+    EXECUTE format('DROP POLICY IF EXISTS %I ON throulyscout.%I', 'Users can view own ' || label, t);
+    EXECUTE format('DROP POLICY IF EXISTS %I ON throulyscout.%I', 'Users can insert own ' || label, t);
+    EXECUTE format('DROP POLICY IF EXISTS %I ON throulyscout.%I', 'Users can update own ' || label, t);
+    EXECUTE format('DROP POLICY IF EXISTS %I ON throulyscout.%I', 'Users can delete own ' || label, t);
+
+    EXECUTE format(
+      'CREATE POLICY %I ON throulyscout.%I FOR SELECT TO authenticated USING (auth.uid() = user_id)',
+      'Users can view own ' || label, t);
+    EXECUTE format(
+      'CREATE POLICY %I ON throulyscout.%I FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id)',
+      'Users can insert own ' || label, t);
+    EXECUTE format(
+      'CREATE POLICY %I ON throulyscout.%I FOR UPDATE TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id)',
+      'Users can update own ' || label, t);
+    EXECUTE format(
+      'CREATE POLICY %I ON throulyscout.%I FOR DELETE TO authenticated USING (auth.uid() = user_id)',
+      'Users can delete own ' || label, t);
+  END LOOP;
+END $$;
