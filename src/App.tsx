@@ -37,7 +37,7 @@ import ClientSavedAnalyses from "./pages/dashboards/ClientSavedAnalyses";
 import ProfileSettings from "./pages/settings/ProfileSettings";
 import AccountSettings from "./pages/settings/AccountSettings";
 import Trust from "./pages/Trust";
-// Temporarily disabled — see render site below. import { AIChatBot } from "./components/chat/AIChatBot";
+import { AIChatBot } from "./components/chat/AIChatBot";
 import { GuidedTour } from "./components/onboarding/GuidedTour";
 
 import Scout from "./pages/Scout";
@@ -144,10 +144,7 @@ const App = () => (
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              {/* Temporarily disabled: LOVABLE_API_KEY secret isn't configured on this
-                  Supabase project, so every chat request 500s. Re-enable once the
-                  secret is set (Project Settings > Edge Functions > Secrets). */}
-              {/* <AIChatBot /> */}
+              <AIChatBot />
               <GuidedTour />
             </BrowserRouter>
           </PrivacyProvider>
