@@ -97,9 +97,12 @@ const Auth = () => {
               .from("saved_scenarios" as any)
               .insert({ ...payload, user_id: session.user.id })
               .then(({ error }) => {
-                if (!error) {
-                  toast.success("Your estimate has been saved to your account");
+                if (error) {
+                  // Keep the pending payload so the next sign-in retries it.
+                  toast.error("We couldn't save your estimate to your account. It will retry next time you sign in.");
+                  return;
                 }
+                toast.success("Your estimate has been saved to your account");
                 localStorage.removeItem("throuly_pending_save");
               });
           }

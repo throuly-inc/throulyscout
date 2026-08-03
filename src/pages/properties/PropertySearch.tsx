@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, Bed, Bath, Maximize, MapPin, Lock, Crown, ArrowRight, Phone, ArrowLeft } from "lucide-react";
 import { US_STATES } from "@/lib/states";
+import { toast } from "sonner";
 
 interface Property {
   id: string;
@@ -73,8 +74,12 @@ export default function PropertySearch() {
 
     query = query.order("asking_price", { ascending: true }).limit(50);
 
-    const { data } = await query;
-    setProperties(((data as unknown) as Property[]) || []);
+    const { data, error } = await query;
+    if (error) {
+      toast.error("Search failed", { description: "Couldn't load properties. Please try again." });
+    } else {
+      setProperties(((data as unknown) as Property[]) || []);
+    }
     setLoading(false);
   };
 

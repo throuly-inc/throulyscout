@@ -51,7 +51,9 @@ export default function ClientSavedAnalyses() {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (!error && data) {
+    if (error) {
+      toast({ title: "Couldn't load analyses", description: "Please refresh to try again.", variant: "destructive" });
+    } else if (data) {
       setAnalyses(
         (data as unknown as SavedAnalysis[]).filter((s) => s.inputs?.type === "market_analysis"),
       );

@@ -5,6 +5,8 @@
 -- write policy matching the existing pattern used for the original 'avatars'
 -- bucket (avatars_owner_write).
 
+DROP POLICY IF EXISTS "throulyscout_avatars_owner_write" ON storage.objects;
+
 CREATE POLICY "throulyscout_avatars_owner_write"
 ON storage.objects
 FOR ALL

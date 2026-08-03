@@ -297,7 +297,9 @@ export default function ClientDashboard() {
       .from("saved_searches" as any)
       .delete()
       .eq("id", id);
-    if (!error) {
+    if (error) {
+      toast({ title: "Delete failed", description: "Couldn't delete the search. Please try again.", variant: "destructive" });
+    } else {
       setSavedSearches((prev) => prev.filter((s) => s.id !== id));
       toast({ title: "Search deleted" });
     }

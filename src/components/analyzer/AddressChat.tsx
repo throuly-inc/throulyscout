@@ -630,6 +630,7 @@ export function AddressChat({ onBeforeSubmit }: AddressChatProps = {}) {
   const [suggestHighlight, setSuggestHighlight] = useState(0);
   const suggestSessionRef = useRef<string>(crypto.randomUUID());
   const suggestDebounceRef = useRef<number | null>(null);
+  const suggestRequestIdRef = useRef(0);
 
   // Debounced Google Places search (suppressed for compare queries)
   useEffect(() => {
@@ -640,10 +641,14 @@ export function AddressChat({ onBeforeSubmit }: AddressChatProps = {}) {
       setSuggestions([]); setSuggestOpen(false); return;
     }
     suggestDebounceRef.current = window.setTimeout(async () => {
+      // Sequence requests so a slow response for an older input can't
+      // overwrite suggestions for what the user is typing now.
+      const requestId = ++suggestRequestIdRef.current;
       try {
         const { data, error } = await supabase.functions.invoke("throulyscout-places-autocomplete", {
           body: { action: "search", input: trimmed, sessionToken: suggestSessionRef.current },
         });
+        if (requestId !== suggestRequestIdRef.current) return;
         if (error) return;
         const preds = data?.predictions || [];
         setSuggestions(preds);

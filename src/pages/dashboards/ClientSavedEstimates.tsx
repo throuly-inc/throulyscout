@@ -91,7 +91,9 @@ export default function ClientSavedEstimates() {
       .order("updated_at", { ascending: false })
       .order("created_at", { ascending: false });
 
-    if (!error && data) {
+    if (error) {
+      toast({ title: "Couldn't load estimates", description: "Please refresh to try again.", variant: "destructive" });
+    } else if (data) {
       // Exclude scenarios saved by other features that share this table
       // (e.g. saved market analyses, assistance-program lookups) so they
       // don't count against the calculator estimate limit below.
