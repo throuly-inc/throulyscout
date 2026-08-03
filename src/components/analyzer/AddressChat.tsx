@@ -12,7 +12,7 @@ import {
   Home, DollarSign, BarChart3, GraduationCap, Loader2, ChevronDown,
   ArrowRight, Bell, GitCompareArrows, Clock, Layers, Bookmark,
   Building, BedDouble, Bath, Ruler, Calendar, LandPlot, ArrowUpRight,
-  ArrowLeft, Save,
+  ArrowLeft, Save, Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
@@ -20,6 +20,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeState, parseLocationInput, parseCompareInput, type StateAnalysis } from "@/lib/market-data";
 import { supabase } from "@/integrations/supabase/client";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 type ChatEntry = {
   id: string;
@@ -31,6 +32,8 @@ type ChatEntry = {
   error?: string;
   timestamp?: string;
 };
+
+
 
 const fmt = (n: number) => n.toLocaleString("en-US");
 const fmtD = (n: number) => "$" + fmt(n);
@@ -127,7 +130,39 @@ function yieldColor(value: number): string {
 
 function ResultCard({ analysis, isAddress, onChipClick, query }: { analysis: StateAnalysis; isAddress?: boolean; onChipClick: (q: string) => void; query?: string }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [visibleSections, setVisibleSections] = useState(0);
+  const [savingAnalysis, setSavingAnalysis] = useState(false);
+  const [analysisSaved, setAnalysisSaved] = useState(false);
+
+  const handleSaveAnalysis = async () => {
+    if (!user) {
+      toast({
+        title: "Sign in to save",
+        description: "Create an account or sign in to save this analysis to your dashboard.",
+      });
+      navigate("/auth");
+      return;
+    }
+    setSavingAnalysis(true);
+    try {
+      const dateStr = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      const { error } = await supabase.from("saved_scenarios" as any).insert({
+        user_id: user.id,
+        scenario_name: `Market Analysis — ${query || analysis.stateName} (${dateStr})`,
+        inputs: { type: "market_analysis", state: analysis.stateName, stateAbbr: analysis.stateAbbr, isAddress: !!isAddress, query },
+        results: analysis,
+      });
+      if (error) throw error;
+      setAnalysisSaved(true);
+      toast({ title: "Analysis saved", description: "View it anytime in My Saved Analyses." });
+    } catch (err: any) {
+      toast({ title: "Couldn't save", description: err.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setSavingAnalysis(false);
+    }
+  };
 
   useEffect(() => {
     const total = isAddress ? 8 : 7;
@@ -357,7 +392,10 @@ function ResultCard({ analysis, isAddress, onChipClick, query }: { analysis: Sta
               variant="accent"
               size="sm"
               className="w-full gap-2"
-              onClick={() => navigate(`/buyers?state=${analysis.stateAbbr}`)}
+              onClick={() => {
+                clearActiveBuyerSession();
+                navigate(`/buyers?state=${analysis.stateAbbr}`);
+              }}
             >
               Calculate Your ROI <ArrowRight className="w-4 h-4" />
             </Button>
@@ -428,7 +466,10 @@ function ResultCard({ analysis, isAddress, onChipClick, query }: { analysis: Sta
           <Button
             variant="accent"
             className="flex-1 gap-2"
-            onClick={() => navigate(`/buyers?state=${analysis.stateAbbr}`)}
+            onClick={() => {
+              clearActiveBuyerSession();
+              navigate(`/buyers?state=${analysis.stateAbbr}`);
+            }}
           >
             Calculate Affordability <ArrowRight className="w-4 h-4" />
           </Button>
@@ -442,20 +483,30 @@ function ResultCard({ analysis, isAddress, onChipClick, query }: { analysis: Sta
           <Button
             variant="outline"
             className="flex-1 gap-2 border-primary/30 text-primary hover:bg-primary/5"
-            onClick={() => { /* TODO: save analysis */ }}
+            onClick={handleSaveAnalysis}
+            disabled={savingAnalysis || analysisSaved}
           >
-            <ArrowUpRight className="w-4 h-4" /> Save Analysis
+            {savingAnalysis ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : analysisSaved ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <ArrowUpRight className="w-4 h-4" />
+            )}
+            {analysisSaved ? "Saved" : "Save Analysis"}
           </Button>
         </div>
         <div className="flex flex-wrap gap-2 mt-3">
-          {[
-            { label: "Compare with another market", action: `Compare ${analysis.stateName} vs ` },
-            { label: "See first-time buyer programs", action: "buyer programs" },
-            { label: `Explore ${analysis.stateName} properties`, action: analysis.stateName },
-          ].map(chip => (
+          {(
+            [
+              { label: "Compare with another market", action: `Compare ${analysis.stateName} vs ` },
+              { label: "See first-time buyer programs", to: `/buyers/programs?state=${encodeURIComponent(analysis.stateName)}` },
+              { label: `Explore ${analysis.stateName} properties`, to: `/properties/search?state=${analysis.stateAbbr}` },
+            ] as { label: string; action?: string; to?: string }[]
+          ).map(chip => (
             <button
               key={chip.label}
-              onClick={() => onChipClick(chip.action)}
+              onClick={() => (chip.to ? navigate(chip.to) : onChipClick(chip.action!))}
               className="text-xs px-3.5 py-2 rounded-full border border-border bg-card hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors shadow-[var(--shadow-sm)]"
             >
               {chip.label}
@@ -590,7 +641,7 @@ export function AddressChat({ onBeforeSubmit }: AddressChatProps = {}) {
     }
     suggestDebounceRef.current = window.setTimeout(async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("places-autocomplete", {
+        const { data, error } = await supabase.functions.invoke("throulyscout-places-autocomplete", {
           body: { action: "search", input: trimmed, sessionToken: suggestSessionRef.current },
         });
         if (error) return;
@@ -610,14 +661,22 @@ export function AddressChat({ onBeforeSubmit }: AddressChatProps = {}) {
     suggestSessionRef.current = crypto.randomUUID();
     setTimeout(() => textareaRef.current?.focus(), 0);
   }, []);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => { scrollToBottom(); }, [entries]);
+  // Scroll each new turn into view starting from its top (the user's question),
+  // not the bottom of the page — otherwise a long result renders off-screen
+  // and the user lands on the tail end of it instead of the beginning.
+  const entryRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const lastScrolledIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    const lastUserEntry = [...entries].reverse().find((e) => e.type === "user");
+    if (lastUserEntry && lastScrolledIdRef.current !== lastUserEntry.id) {
+      lastScrolledIdRef.current = lastUserEntry.id;
+      requestAnimationFrame(() => {
+        entryRefs.current[lastUserEntry.id]?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, [entries]);
 
   const processQuery = async (query: string) => {
     if (!query.trim()) return;
@@ -655,6 +714,7 @@ export function AddressChat({ onBeforeSubmit }: AddressChatProps = {}) {
     setEntries(prev => [...prev.filter(e => e.id !== loadingId), { id, type: "result", analysis, isAddress: loc.isSpecificAddress, query }]);
     if (!privacyMode) saveQuery(query, loc.stateAbbr);
   };
+
 
   const saveQuery = async (query: string, stateIdentified: string) => {
     try {
@@ -708,11 +768,18 @@ export function AddressChat({ onBeforeSubmit }: AddressChatProps = {}) {
       <div className="flex flex-wrap items-center justify-between gap-2 px-4 md:px-6 py-3 border-b border-border bg-muted/30">
         <div className="flex items-center gap-3">
           {user && (
-            <Link to="/dashboard/client">
-              <Button variant="ghost" size="sm" className="text-foreground hover:text-foreground -ml-2">
-                <ArrowLeft className="w-4 h-4 mr-1" /> Dashboard
-              </Button>
-            </Link>
+            <>
+              <Link to="/dashboard/client">
+                <Button variant="ghost" size="sm" className="text-foreground hover:text-foreground -ml-2">
+                  <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
+                </Button>
+              </Link>
+              <Link to="/dashboard/client/saved-analyses">
+                <Button variant="ghost" size="sm" className="text-foreground hover:text-foreground">
+                  <Bookmark className="w-4 h-4 mr-1" /> Saved Analyses
+                </Button>
+              </Link>
+            </>
           )}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Shield className="w-4 h-4" />
@@ -775,7 +842,7 @@ export function AddressChat({ onBeforeSubmit }: AddressChatProps = {}) {
           ) : (
             <div className="space-y-6">
               {entries.map(entry => (
-                <div key={entry.id}>
+                <div key={entry.id} ref={(el) => (entryRefs.current[entry.id] = el)}>
                   {entry.type === "user" && (
                     <div className="flex gap-3 justify-end">
                       <div className="max-w-[85%] rounded-2xl px-5 py-3 bg-primary text-primary-foreground shadow-[var(--shadow-sm)]">
@@ -829,7 +896,8 @@ export function AddressChat({ onBeforeSubmit }: AddressChatProps = {}) {
                   )}
                 </div>
               ))}
-              <div ref={messagesEndRef} />
+
+              
             </div>
           )}
         </div>

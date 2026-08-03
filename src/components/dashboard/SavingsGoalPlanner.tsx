@@ -40,11 +40,13 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatCurrency } from "@/lib/calculator";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
   useSavingsProjection,
   computeSavingsProjection,
+  addMonths,
   type ExpenseRow,
   type ReadinessTargets,
 } from "@/hooks/useSavingsProjection";
@@ -106,9 +108,20 @@ interface NumberFieldProps {
   placeholder?: string;
   className?: string;
   min?: number;
+  max?: number;
   ariaLabel?: string;
   allowEmpty?: boolean;
 }
+
+const formatWithCommas = (s: string) => {
+  if (!s) return s;
+  const neg = s.startsWith("-");
+  const body = neg ? s.slice(1) : s;
+  const [intPart, decPart] = body.split(".");
+  const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return (neg ? "-" : "") + withCommas + (decPart !== undefined ? "." + decPart : "");
+};
+
 function NumberField({
   id,
   value,
@@ -116,11 +129,13 @@ function NumberField({
   placeholder,
   className,
   min = 0,
+  max,
   ariaLabel,
   allowEmpty = false,
 }: NumberFieldProps) {
   const [raw, setRaw] = useState<string>(value != null ? String(value) : "");
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
 
   useEffect(() => {
     const parsed = Number(raw);
@@ -136,22 +151,27 @@ function NumberField({
   }, [value]);
 
   const handle = (s: string) => {
-    setRaw(s);
-    if (s === "") {
+    const clean = s.replace(/,/g, "");
+    setRaw(clean);
+    if (clean === "") {
       setError(null);
+      setWarning(null);
       onChange(allowEmpty ? null : 0);
       return;
     }
-    const n = Number(s);
+    const n = Number(clean);
     if (Number.isNaN(n)) {
       setError("Enter a valid number");
+      setWarning(null);
       return;
     }
     if (n < min) {
       setError(`Must be ${min} or greater`);
+      setWarning(null);
       return;
     }
     setError(null);
+    setWarning(max != null && n > max ? "That's unusually high — double check?" : null);
     onChange(n);
   };
 
@@ -159,24 +179,24 @@ function NumberField({
     <div className="space-y-1">
       <Input
         id={id}
-        type="number"
+        type="text"
         inputMode="decimal"
         aria-label={ariaLabel}
         aria-invalid={!!error}
-        className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-          error ? "border-destructive focus-visible:ring-destructive" : ""
-        } ${className || ""}`}
-        value={raw}
+        className={`${error ? "border-destructive focus-visible:ring-destructive" : ""} ${className || ""}`}
+        value={formatWithCommas(raw)}
         onChange={(e) => handle(e.target.value)}
+        onFocus={(e) => e.target.select()}
         placeholder={placeholder}
       />
       {error && <p className="text-[11px] text-destructive">{error}</p>}
+      {!error && warning && <p className="text-[11px] text-warning">{warning}</p>}
     </div>
   );
 }
 
 const fmtDate = (d: Date | null) =>
-  d ? d.toLocaleDateString(undefined, { month: "long", year: "numeric" }) : "—";
+  d ? d.toLocaleDateString(undefined, { month: "short", year: "numeric" }) : "—";
 
 const fmtTime = (m: number | null) => {
   if (m === null) return "—";
@@ -217,6 +237,32 @@ export function SavingsGoalPlanner({
   userId = null,
 }: Props) {
   const { toast } = useToast();
+  // Controlled so "jump to X" CTAs (below) can switch tabs before scrolling —
+  // the anchor ids live inside TabsContent panels, which are hidden/unmounted
+  // when their tab isn't active, so scrollIntoView alone silently did nothing.
+  const [innerTab, setInnerTab] = useState<string>("budget");
+  const ANCHOR_TAB: Record<string, string> = {
+    "budget-anchor": "budget",
+    "checkin-anchor": "checkin",
+    "simulator-anchor": "explore",
+  };
+  // Queue a scroll target instead of firing scrollIntoView immediately —
+  // requestAnimationFrame after setInnerTab was not a reliable enough
+  // guarantee that the tab's content had actually committed to the DOM yet.
+  // A useEffect keyed on this id runs strictly after React commits the
+  // corresponding render (including any tab switch above), which is the one
+  // guarantee we actually need.
+  const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
+  const scrollToAnchor = (id: string) => {
+    const tab = ANCHOR_TAB[id];
+    if (tab) setInnerTab(tab);
+    setPendingScrollId(id);
+  };
+  useEffect(() => {
+    if (!pendingScrollId) return;
+    document.getElementById(pendingScrollId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setPendingScrollId(null);
+  }, [pendingScrollId, innerTab]);
   const [goal, setGoal] = useState<number>(defaultGoal);
   const [currentSavings, setCurrentSavings] = useState<number>(defaultCurrentSavings);
   const [monthlyIncome, setMonthlyIncome] = useState<number>(defaultIncome);
@@ -918,7 +964,7 @@ export function SavingsGoalPlanner({
         )} would put you back on pace.`,
         cta: {
           label: "Adjust budget",
-          onClick: () => document.getElementById("budget-anchor")?.scrollIntoView({ behavior: "smooth" }),
+          onClick: () => scrollToAnchor("budget-anchor"),
         },
       });
     }
@@ -935,7 +981,7 @@ export function SavingsGoalPlanner({
         } sooner.`,
         cta: {
           label: "Explore a faster plan",
-          onClick: () => document.getElementById("simulator-anchor")?.scrollIntoView({ behavior: "smooth" }),
+          onClick: () => scrollToAnchor("simulator-anchor"),
         },
       });
     }
@@ -945,7 +991,7 @@ export function SavingsGoalPlanner({
       text: "We need your income and expenses to personalize recommendations.",
       cta: {
         label: "Complete budget",
-        onClick: () => document.getElementById("budget-anchor")?.scrollIntoView({ behavior: "smooth" }),
+        onClick: () => scrollToAnchor("budget-anchor"),
       },
     });
   }
@@ -1046,7 +1092,13 @@ export function SavingsGoalPlanner({
           <div className="rounded-md border border-accent/30 bg-accent/5 p-3 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
             <div>
               <p className="text-[11px] uppercase tracking-wider text-muted-foreground">New date</p>
-              <p className="font-semibold">{fmtDate(simProjection.projectedGoalDate)}</p>
+              <p className="font-semibold">
+                {fmtDate(
+                  simProjection.projectedGoalDate
+                    ? addMonths(simProjection.projectedGoalDate, sim.monthsDelta)
+                    : simProjection.projectedGoalDate,
+                )}
+              </p>
             </div>
             <div>
               <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -1157,31 +1209,37 @@ export function SavingsGoalPlanner({
                   {item.target > 0 && <>of {formatCurrency(item.target)}</>}
                 </span>
                 {i > 0 && (
-                  <div className="flex items-center gap-1">
-                    <NumberField
-                      value={item.target}
-                      onChange={(n) =>
-                        setMeta((m) => ({
-                          ...m,
-                          readiness: { ...m.readiness, [item.key]: n ?? 0 },
-                        }))
-                      }
-                      placeholder="Target"
-                      className="h-7 w-20 text-xs"
-                      ariaLabel={`${item.label} target`}
-                    />
-                    <NumberField
-                      value={item.saved}
-                      onChange={(n) =>
-                        setMeta((m) => ({
-                          ...m,
-                          readiness: { ...m.readiness, [item.savedKey]: n ?? 0 },
-                        }))
-                      }
-                      placeholder="Saved"
-                      className="h-7 w-20 text-xs"
-                      ariaLabel={`${item.label} saved`}
-                    />
+                  <div className="flex items-end gap-1">
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] text-muted-foreground text-center">Target</p>
+                      <NumberField
+                        value={item.target}
+                        onChange={(n) =>
+                          setMeta((m) => ({
+                            ...m,
+                            readiness: { ...m.readiness, [item.key]: n ?? 0 },
+                          }))
+                        }
+                        placeholder="Target"
+                        className="h-7 w-20 text-xs"
+                        ariaLabel={`${item.label} target`}
+                      />
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] text-muted-foreground text-center">Saved</p>
+                      <NumberField
+                        value={item.saved}
+                        onChange={(n) =>
+                          setMeta((m) => ({
+                            ...m,
+                            readiness: { ...m.readiness, [item.savedKey]: n ?? 0 },
+                          }))
+                        }
+                        placeholder="Saved"
+                        className="h-7 w-20 text-xs"
+                        ariaLabel={`${item.label} saved`}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -1194,7 +1252,7 @@ export function SavingsGoalPlanner({
           approval, loan qualification, or financial advice.
         </p>
         <div className="flex justify-end">
-          <Link to="/buyers">
+          <Link to="/buyers" onClick={clearActiveBuyerSession}>
             <Button size="sm" variant="outline">
               See what I may be able to afford <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </Button>
@@ -1230,6 +1288,7 @@ export function SavingsGoalPlanner({
               }
               placeholder="0"
               allowEmpty
+              max={1_000_000}
             />
           </div>
           <div className="space-y-1.5">
@@ -1294,16 +1353,12 @@ export function SavingsGoalPlanner({
               key={i}
               size="sm"
               variant={i === 0 ? "default" : "outline"}
-              onClick={() =>
-                document
-                  .getElementById(s.to.slice(1))
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
+              onClick={() => scrollToAnchor(s.to.slice(1))}
             >
               {s.label} <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </Button>
           ) : (
-            <Link key={i} to={s.to}>
+            <Link key={i} to={s.to} onClick={s.to === "/buyers" ? clearActiveBuyerSession : undefined}>
               <Button size="sm" variant={i === 0 ? "default" : "outline"}>
                 {s.label} <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
@@ -1486,7 +1541,7 @@ export function SavingsGoalPlanner({
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-4 pt-5 border-t border-foreground/5">
+              <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_260px] gap-4 pt-5 border-t border-foreground/5">
                 <div className="rounded-xl border border-accent/30 p-4 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="w-4 h-4 text-accent" />
@@ -1564,7 +1619,7 @@ export function SavingsGoalPlanner({
             </p>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="budget" className="w-full">
+            <Tabs value={innerTab} onValueChange={setInnerTab} className="w-full">
               <TabsList className="grid grid-cols-2 sm:grid-cols-4 h-auto gap-1 bg-muted/60 p-1">
                 <TabsTrigger value="budget" className="text-xs sm:text-sm py-2">
                   <Wallet className="w-3.5 h-3.5 mr-1.5" />
@@ -1613,6 +1668,7 @@ export function SavingsGoalPlanner({
 
         <Link
           to="/buyers"
+          onClick={clearActiveBuyerSession}
           className="block mt-4 animate-fade-in"
           style={{ animationDelay: "240ms", animationFillMode: "backwards" }}
         >

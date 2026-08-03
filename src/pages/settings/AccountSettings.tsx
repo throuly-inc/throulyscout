@@ -20,7 +20,8 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { AlertTriangle, CreditCard, Bell, Shield, Sparkles } from "lucide-react";
 import { TOUR_STORAGE_KEY } from "@/components/onboarding/GuidedTour";
-import { clearBuyerSessionData } from "@/lib/buyerSessionStorage";
+import { clearBuyerSessionData, clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
+import { usePrivacy } from "@/contexts/PrivacyContext";
 
 const DASH_MAP: Record<string, string> = {
   agent: "/dashboard/agent",
@@ -58,10 +59,7 @@ export default function AccountSettings() {
   const navigate = useNavigate();
   const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(DEFAULT_NOTIF);
   const [privacyPrefs, setPrivacyPrefs] = useState<PrivacyPrefs>(DEFAULT_PRIVACY);
-  const [privateMode, setPrivateMode] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("throuly-private-mode") === "true";
-  });
+  const { isPrivateMode, togglePrivateMode } = usePrivacy();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -109,13 +107,6 @@ export default function AccountSettings() {
     savePrefs(notifPrefs, updated);
   };
 
-  const handleTogglePrivateMode = () => {
-    setPrivateMode((prev) => {
-      const next = !prev;
-      localStorage.setItem("throuly-private-mode", String(next));
-      return next;
-    });
-  };
 
   const tierBadge = (tier: string) => {
     switch (tier) {
@@ -190,6 +181,7 @@ export default function AccountSettings() {
                 onClick={() => {
                   if (typeof window !== "undefined")
                     window.localStorage.removeItem(TOUR_STORAGE_KEY);
+                  clearActiveBuyerSession();
                   navigate("/buyers?tour=1");
                 }}
               >
@@ -206,18 +198,15 @@ export default function AccountSettings() {
                 <CreditCard className="w-5 h-5 text-primary" />
                 <CardTitle>Subscription</CardTitle>
               </div>
-              <CardDescription>Manage your plan and billing</CardDescription>
+              <CardDescription>throuly is free — no plans or billing yet</CardDescription>
             </CardHeader>
-            <CardContent className="flex items-center justify-between">
+            <CardContent>
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">Current plan:</span>
                 <Badge variant={tierBadge(profile.subscription_tier) as any} className="capitalize">
                   {profile.subscription_tier}
                 </Badge>
               </div>
-              <Link to="/pricing">
-                <Button variant="outline" size="sm">View Plans</Button>
-              </Link>
             </CardContent>
           </Card>
 
@@ -268,14 +257,14 @@ export default function AccountSettings() {
                     <p className="text-xs text-muted-foreground">Browse without saving activity to your account</p>
                   </div>
                   <Switch
-                    checked={privateMode}
-                    onCheckedChange={handleTogglePrivateMode}
+                    checked={isPrivateMode}
+                    onCheckedChange={togglePrivateMode}
                   />
                 </div>
                 <p
                   className={cn(
                     "text-xs font-medium transition-all duration-300 ease-out",
-                    privateMode
+                    isPrivateMode
                       ? "text-accent opacity-100 max-h-6 mt-0.5"
                       : "text-muted-foreground opacity-0 max-h-0 mt-0 overflow-hidden"
                   )}

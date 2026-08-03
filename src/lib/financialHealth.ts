@@ -59,6 +59,14 @@ export interface HealthInputs {
   profile: FinancialProfile;
   hoaMonthly: number;
   loanTypeId: string;
+  /**
+   * The buyer's actual target home price (e.g. from the affordability
+   * calculator). When present, the DTI and monthly-affordability factors are
+   * scored against this fixed price instead of the "comfortable" tier price —
+   * which is itself derived as ~28% of whatever income is entered, so scoring
+   * it against income would be near-tautological and barely move with income.
+   */
+  targetHomePrice?: number;
   overrides?: {
     yearlyIncome?: number;
     monthlyDebt?: number;
@@ -222,12 +230,20 @@ export function computeFinancialHealth(inputs: HealthInputs): FinancialHealthRep
   const hasIncome = grossMonthlyIncome > 0;
 
   // Budgets:
-  //  - Comfortable = 28% front-end of gross income (perfect, safe number).
+  //  - Comfortable = 28% front-end of gross income (perfect, safe number),
+  //                  capped by the standard back-end DTI limit minus existing
+  //                  debt so heavy monthly debt visibly lowers this tier too.
   //  - Maximum    = expanded DTI ceiling (theoretical max a lender may approve).
   //  - Stretch    = what the buyer could qualify for if they paid down ~half
   //                 their monthly debt (i.e. "pushed a few things around").
   //                 Calculated at the program back-end DTI cap.
-  const comfortableMonthlyBudget = hasIncome ? grossMonthlyIncome * 0.28 : 0;
+  const comfortableFrontEndBudget = hasIncome ? grossMonthlyIncome * 0.28 : 0;
+  const comfortableBackEndCap = hasIncome
+    ? Math.max(0, grossMonthlyIncome * (loanType.maxDTI / 100) - baseProfile.monthlyDebt)
+    : 0;
+  const comfortableMonthlyBudget = hasIncome
+    ? Math.min(comfortableFrontEndBudget, comfortableBackEndCap)
+    : 0;
 
   // Simulated profile for stretch: half the current monthly debt.
   const stretchProfile: FinancialProfile = {
@@ -277,6 +293,13 @@ export function computeFinancialHealth(inputs: HealthInputs): FinancialHealthRep
     ? calculateMortgage(maxPrice, dpPct, inputs.state, baseProfile, hoa, loanType.id, rateOverride)
     : emptyCalc;
 
+  // The buyer's actual target price, when known — used to score DTI and
+  // monthly-affordability so those factors reflect a fixed price rather than
+  // one that automatically rescales with income (see HealthInputs.targetHomePrice).
+  const targetCalc = hasIncome && inputs.targetHomePrice && inputs.targetHomePrice > 0
+    ? calculateMortgage(inputs.targetHomePrice, dpPct, inputs.state, baseProfile, hoa, loanType.id, rateOverride)
+    : comfortableCalc;
+
   // Cash readiness — at comfortable price
   const prepaids = Math.round(comfortableCalc.homePrice * 0.01);
   const cashToClose = comfortableCalc.downPaymentAmount + comfortableCalc.closingCosts + prepaids;
@@ -295,13 +318,16 @@ export function computeFinancialHealth(inputs: HealthInputs): FinancialHealthRep
           ? "attention"
           : "risk";
 
-  // Factor scores
-  const dtiScoreVal = scoreDTI(comfortableCalc.backEndDTI, loanType.maxDTI);
+  // Factor scores — DTI and monthly-affordability are scored against the
+  // buyer's actual target price (targetCalc) rather than the comfortable
+  // tier, since the comfortable price is itself derived from income and
+  // would make these factors near-tautological if scored against themselves.
+  const dtiScoreVal = scoreDTI(targetCalc.backEndDTI, loanType.maxDTI);
   const creditScoreVal = scoreCredit(baseProfile.creditScore);
   const savingsScoreVal = scoreSavingsReadiness(baseProfile.savings, cashToClose);
   const reservesScoreVal = scoreReserves(reservesInMonths);
   const monthlyScoreVal = scoreMonthlyAffordability(
-    comfortableCalc.totalMonthlyPayment,
+    targetCalc.totalMonthlyPayment,
     baseProfile.yearlyIncome,
   );
   const income = scoreIncomeStability(baseProfile);
@@ -320,7 +346,7 @@ export function computeFinancialHealth(inputs: HealthInputs): FinancialHealthRep
     {
       key: "dti",
       label: "Debt-to-income",
-      value: `${comfortableCalc.backEndDTI.toFixed(1)}%`,
+      value: `${targetCalc.backEndDTI.toFixed(1)}%`,
       score: dtiScoreVal,
       status: statusFromScore(dtiScoreVal),
       weight: 25,
@@ -350,7 +376,7 @@ export function computeFinancialHealth(inputs: HealthInputs): FinancialHealthRep
     {
       key: "monthly",
       label: "Monthly affordability",
-      value: `${Math.round((comfortableCalc.totalMonthlyPayment / Math.max(grossMonthlyIncome, 1)) * 100)}% of income`,
+      value: `${Math.round((targetCalc.totalMonthlyPayment / Math.max(grossMonthlyIncome, 1)) * 100)}% of income`,
       score: monthlyScoreVal,
       status: statusFromScore(monthlyScoreVal),
       weight: 15,

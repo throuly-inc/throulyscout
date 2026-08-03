@@ -91,11 +91,8 @@ export function FinancialHealthIntroModal({ trigger }: FinancialHealthIntroModal
           </ul>
         </div>
 
-        <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-2 max-sm:px-5 max-sm:py-4 max-sm:border-t max-sm:border-border max-sm:bg-background max-sm:mt-0">
-          <Button variant="ghost" className="max-sm:w-full" onClick={() => handleOpenChange(false)}>
-            Skip
-          </Button>
-          <Button variant="accent" className="max-sm:w-full" onClick={() => handleOpenChange(false)}>
+        <DialogFooter className="max-sm:px-5 max-sm:py-4 max-sm:border-t max-sm:border-border max-sm:bg-background max-sm:mt-0">
+          <Button variant="accent" className="w-full" onClick={() => handleOpenChange(false)}>
             Got it, let's start
           </Button>
         </DialogFooter>

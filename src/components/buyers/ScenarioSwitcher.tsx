@@ -13,6 +13,16 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Layers, Plus, Trash2, Check, GitCompare, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { calculateMortgage, formatCurrency } from "@/lib/calculator";
@@ -111,6 +121,7 @@ export function ScenarioSwitcher({ currentInputs, currentSnapshot, onLoad, userI
   const [compareMode, setCompareMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const loadFromDb = async (uid: string) => {
     const { data } = await supabase
@@ -119,10 +130,16 @@ export function ScenarioSwitcher({ currentInputs, currentSnapshot, onLoad, userI
       .eq("user_id", uid)
       .neq("scenario_name", "Financial Health Report")
       .order("created_at", { ascending: false })
-      .limit(5);
+      .limit(20);
+    // Market Analysis saves (from the Analyzer's "Save Analysis" button) have
+    // a different shape than a buyer-calculator scenario (no homePrice/
+    // results), so they don't belong in this switcher — they'd show as a
+    // scenario with $0 everywhere.
     const mapped = ((data as any[]) || [])
+      .filter((row) => row.inputs?.type !== "market_analysis")
       .map(mapDbRowToScenario)
-      .filter((s): s is BuyerScenario => Boolean(s));
+      .filter((s): s is BuyerScenario => Boolean(s))
+      .slice(0, 5);
     setScenarios(mapped);
   };
 
@@ -195,11 +212,14 @@ export function ScenarioSwitcher({ currentInputs, currentSnapshot, onLoad, userI
     toast({ title: "Scenario loaded", description: `Switched to "${s.name}".` });
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async () => {
+    const id = deleteId;
+    if (!id) return;
     if (userId) {
       const { error } = await supabase.from("saved_scenarios").delete().eq("id", id);
       if (error) {
         toast({ title: "Couldn't delete", description: error.message, variant: "destructive" });
+        setDeleteId(null);
         return;
       }
       setScenarios((prev) => prev.filter((s) => s.id !== id));
@@ -210,6 +230,7 @@ export function ScenarioSwitcher({ currentInputs, currentSnapshot, onLoad, userI
     }
     if (activeId === id) setActiveId(null);
     setSelectedIds((prev) => prev.filter((sid) => sid !== id));
+    setDeleteId(null);
   };
 
 
@@ -379,7 +400,7 @@ export function ScenarioSwitcher({ currentInputs, currentSnapshot, onLoad, userI
                     size="icon"
                     variant="ghost"
                     className="h-7 w-7 shrink-0"
-                    onClick={() => handleDelete(s.id)}
+                    onClick={() => setDeleteId(s.id)}
                     aria-label={`Delete ${s.name}`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -559,6 +580,21 @@ export function ScenarioSwitcher({ currentInputs, currentSnapshot, onLoad, userI
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this scenario?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The saved scenario will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

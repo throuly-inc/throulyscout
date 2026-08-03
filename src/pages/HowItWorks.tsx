@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { SiteMap } from "@/components/guide/SiteMap";
 import { HowItWorksMetrics } from "@/components/how-it-works/HowItWorksMetrics";
 import { TOUR_STORAGE_KEY } from "@/components/onboarding/GuidedTour";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import { Sparkles, Shield, MapPin, DollarSign, BarChart3, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +51,7 @@ export default function HowItWorks() {
 
   const restartTour = () => {
     if (typeof window !== "undefined") window.localStorage.removeItem(TOUR_STORAGE_KEY);
+    clearActiveBuyerSession();
     navigate("/buyers?tour=1");
   };
 
@@ -114,7 +116,10 @@ export default function HowItWorks() {
                 </h2>
                 <div className="space-y-3 text-foreground/90 leading-relaxed">
                   <p>
-                    Head to the <Link to="/buyers" className="text-accent underline">Calculator</Link>{" "}
+                    Head to the{" "}
+                    <Link to="/buyers" onClick={clearActiveBuyerSession} className="text-accent underline">
+                      Calculator
+                    </Link>{" "}
                     and answer a few questions about your income, monthly debts, savings, and credit
                     range. You'll pick the state you're buying in so the numbers reflect real local
                     taxes, insurance, and interest rates. It takes about 3 minutes and no account is

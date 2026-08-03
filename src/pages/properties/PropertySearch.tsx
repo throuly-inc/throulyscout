@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/contexts/SubscriptionContext";
@@ -36,6 +36,7 @@ export default function PropertySearch() {
   const { profile } = useAuth();
   const { canAccess } = useSubscription();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const dashboardHref = "/dashboard/client";
   const isPremium = canAccess("full_address");
 
@@ -43,7 +44,7 @@ export default function PropertySearch() {
   const [loading, setLoading] = useState(false);
 
   // Filters
-  const [stateFilter, setStateFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState(() => searchParams.get("state") || "");
   const [cityFilter, setCityFilter] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -90,14 +91,16 @@ export default function PropertySearch() {
       <Navbar />
       <div className="pt-20 pb-12 px-4">
         <div className="max-w-7xl mx-auto space-y-6">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <h1 className="font-serif text-3xl text-foreground">Find Properties</h1>
-            <Button variant="outline" size="sm" asChild>
-              <Link to={dashboardHref}>
+          <div>
+            <Link to={dashboardHref}>
+              <Button variant="ghost" size="sm" className="-ml-2">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Dashboard
-              </Link>
-            </Button>
+              </Button>
+            </Link>
+          </div>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <h1 className="font-serif text-3xl text-foreground">Find Properties</h1>
           </div>
 
           {/* Filter Bar */}

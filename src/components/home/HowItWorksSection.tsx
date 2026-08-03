@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import hiwAnswer from "@/assets/hiw-answer.png";
 import hiwResults from "@/assets/hiw-results.png";
 import hiwExplore from "@/assets/hiw-explore.png";
@@ -175,7 +176,7 @@ export const HowItWorksSection = forwardRef<HTMLElement>((props, ref) => {
 
         {/* CTA */}
         <div className="text-center">
-          <Link to="/buyers">
+          <Link to="/buyers" onClick={clearActiveBuyerSession}>
             <button
               className="transition-all duration-200"
               style={{

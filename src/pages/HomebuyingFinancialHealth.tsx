@@ -47,6 +47,7 @@ import {
   checkLoanEligibility,
   formatCurrency,
   formatPercent,
+  getRateConfidenceBand,
 } from "@/lib/calculator";
 import {
   computeFinancialHealth,
@@ -173,7 +174,7 @@ function SectionHeader({
 export default function HomebuyingFinancialHealth() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { guardSave } = usePrivacy();
+  const { guardSave, isPrivateMode } = usePrivacy();
   const { user } = useAuth();
   const session = useMemo(readSession, []);
   const [savedSnapshotInputs, setSavedSnapshotInputs] = useState<string | null>(null);
@@ -207,6 +208,9 @@ export default function HomebuyingFinancialHealth() {
     downPct: number;
     rate: number;
     hoa: number;
+    // True once the Interest Rate slider has been touched directly — from
+    // then on it stops auto-following the Credit Score slider.
+    rateTouched: boolean;
   } | null>(null);
 
   const baseInputs = useMemo(() => {
@@ -216,6 +220,7 @@ export default function HomebuyingFinancialHealth() {
       profile: session.financialProfile,
       hoaMonthly: hoaEdit,
       loanTypeId: session.loanTypeId,
+      targetHomePrice: session.homePrice,
       overrides: {
         downPaymentPercent: downPct,
         rateOverride,
@@ -235,6 +240,7 @@ export default function HomebuyingFinancialHealth() {
       profile: session.financialProfile,
       hoaMonthly: sim.hoa,
       loanTypeId: session.loanTypeId,
+      targetHomePrice: session.homePrice,
       overrides: {
         yearlyIncome: sim.income,
         monthlyDebt: sim.debt,
@@ -257,6 +263,7 @@ export default function HomebuyingFinancialHealth() {
       downPct,
       rate: baseReport.monthlyAtComfortable.rateRange.mid,
       hoa: hoaEdit,
+      rateTouched: false,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, baseReport]);
@@ -385,16 +392,17 @@ export default function HomebuyingFinancialHealth() {
   };
 
   // Auto-sync: whenever inputs change, upsert after a short debounce so the
-  // dashboard and results page always see the latest numbers.
+  // dashboard and results page always see the latest numbers. Skipped while
+  // Private Mode is on — nothing should be written to the account silently.
   useEffect(() => {
-    if (!user || !currentInputsKey || !baseReport) return;
+    if (!user || !currentInputsKey || !baseReport || isPrivateMode) return;
     if (savedSnapshotInputs === currentInputsKey) return;
     const t = window.setTimeout(() => {
       void persistFinancialHealth();
     }, 800);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, currentInputsKey, savedRowId]);
+  }, [user, currentInputsKey, savedRowId, isPrivateMode]);
 
   const handleSaveAndViewResults = async () => {
     if (!guardSave("save your financial health report")) return;
@@ -439,6 +447,7 @@ export default function HomebuyingFinancialHealth() {
       downPct,
       rate: baseReport.monthlyAtComfortable.rateRange.mid,
       hoa: hoaEdit,
+      rateTouched: false,
     });
   };
 
@@ -558,7 +567,7 @@ export default function HomebuyingFinancialHealth() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate("/buyers")}
+              onClick={() => navigate("/buyers?edit=1")}
               className="-ml-2"
             >
               <ArrowLeft className="mr-1 h-4 w-4" /> Back
@@ -954,24 +963,24 @@ export default function HomebuyingFinancialHealth() {
             {/* Program Fit — v3 list-style */}
             <div className="rounded-3xl border border-border/60 bg-card p-6 md:p-8">
               <h3 className="mb-6 font-serif text-2xl italic">Program fit</h3>
-              <ul className="space-y-4">
+              <ul className="space-y-1.5">
                 {eligiblePrograms.map(({ lt, benefit }) => (
-                  <li key={lt.id} className="flex items-center gap-3">
-                    <div className="h-2 w-2 shrink-0 rounded-full bg-primary" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{lt.name}</div>
-                      <div className="text-xs text-muted-foreground truncate">{benefit}</div>
-                    </div>
+                  <li key={lt.id} className="flex items-start gap-2 text-sm">
+                    <CheckCircle2 aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                    <span className="flex-1 min-w-0">
+                      <span className="font-medium">{lt.name}</span>
+                      <span className="block text-xs text-muted-foreground truncate">{benefit}</span>
+                    </span>
                     <span className="shrink-0 text-xs font-bold uppercase tracking-wider text-success">Match</span>
                   </li>
                 ))}
                 {ineligiblePrograms.map(({ lt, el }) => (
-                  <li key={lt.id} className="flex items-center gap-3 opacity-50">
-                    <div className="h-2 w-2 shrink-0 rounded-full bg-destructive" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{lt.name}</div>
-                      <div className="text-xs text-muted-foreground truncate">{el.reason}</div>
-                    </div>
+                  <li key={lt.id} className="flex items-start gap-2 text-sm opacity-50">
+                    <AlertCircle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="flex-1 min-w-0">
+                      <span className="font-medium">{lt.name}</span>
+                      <span className="block text-xs text-muted-foreground truncate">{el.reason}</span>
+                    </span>
                     <span className="shrink-0 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                       Ineligible
                     </span>
@@ -1059,25 +1068,31 @@ export default function HomebuyingFinancialHealth() {
 
           {/* 9. What-if Simulator — v3-style dark hero with projected panel */}
           {sim && (
-            <section className="mb-10 relative overflow-hidden rounded-[32px] bg-card p-6 sm:p-8 md:p-12 border border-border shadow-xl">
-              <div className="pointer-events-none absolute -bottom-32 -right-32 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+            <section className="mb-10 relative overflow-hidden rounded-[32px] bg-primary p-6 sm:p-8 md:p-12 text-primary-foreground">
+              <div className="pointer-events-none absolute -bottom-32 -right-32 h-64 w-64 rounded-full bg-primary-foreground/10 blur-3xl" />
               <div className="relative">
                 <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                   <div>
-                    <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
+                    <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] opacity-80">
                       The Simulator
                     </p>
                     <h2 className="font-serif text-3xl md:text-4xl italic">
                       The "What-if" simulator
                     </h2>
-                    <p className="mt-2 max-w-md text-sm text-muted-foreground">
+                    <p className="mt-2 max-w-md text-sm font-semibold opacity-80">
                       Move the sliders — every number updates instantly.
                     </p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={resetSim}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetSim}
+                    className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                  >
                     <RotateCcw className="mr-1 h-3.5 w-3.5" /> Reset
                   </Button>
                 </div>
+
                 <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2">
                   <div className="space-y-6">
                     <SimSlider
@@ -1101,7 +1116,20 @@ export default function HomebuyingFinancialHealth() {
                     <SimSlider
                       label="Credit score"
                       value={sim.credit}
-                      onChange={(v) => setSim({ ...sim, credit: v })}
+                      onChange={(v) => {
+                        if (sim.rateTouched) {
+                          setSim({ ...sim, credit: v });
+                          return;
+                        }
+                        // Auto-follow the credit-adjusted rate until the user
+                        // manually overrides the Interest Rate slider below.
+                        const autoRate = getRateConfidenceBand(
+                          selectedState.avgMortgageRate,
+                          loanType,
+                          v,
+                        ).mid;
+                        setSim({ ...sim, credit: v, rate: autoRate });
+                      }}
                       min={500}
                       max={850}
                       step={1}
@@ -1128,7 +1156,7 @@ export default function HomebuyingFinancialHealth() {
                     <SimSlider
                       label="Interest rate"
                       value={sim.rate}
-                      onChange={(v) => setSim({ ...sim, rate: v })}
+                      onChange={(v) => setSim({ ...sim, rate: v, rateTouched: true })}
                       min={3}
                       max={10}
                       step={0.125}
@@ -1145,26 +1173,26 @@ export default function HomebuyingFinancialHealth() {
                     />
                   </div>
 
-                  {/* Projected panel */}
-                  <div className="flex flex-col rounded-2xl bg-foreground p-6 sm:p-8 text-foreground">
-                    <p className="mb-6 text-[10px] font-bold uppercase tracking-[0.2em] opacity-50">
+                  {/* Projected panel — inset translucent card on the ink section. */}
+                  <div className="flex flex-col rounded-2xl border border-primary-foreground/15 bg-primary-foreground/[0.07] p-6 sm:p-8">
+                    <p className="mb-6 text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
                       Projected outcome
                     </p>
                     <div className="mb-8">
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-accent opacity-90 mb-1">
+                      <div className="mb-1 text-[10px] font-bold uppercase tracking-widest opacity-80">
                         Comfortable budget
                       </div>
-                      <div className="font-serif text-4xl sm:text-5xl font-bold tabular-nums text-accent break-words">
-
+                      <div className="font-serif text-4xl sm:text-5xl font-bold tabular-nums break-words">
                         {formatCurrency(activeReport.comfortable.price)}
                       </div>
                       {activeReport.comfortable.price !== report.comfortable.price && (
-                        <div className="mt-2 text-xs opacity-60">
+                        <div className="mt-2 text-xs font-semibold opacity-70">
                           was {formatCurrency(report.comfortable.price)}
                         </div>
                       )}
                     </div>
-                    <div className="space-y-3 border-t border-border pt-5">
+                    <div className="space-y-3 border-t border-primary-foreground/15 pt-5">
+
                       <SimResult
                         label="Health score"
                         value={`${activeReport.overallScore} / 100`}
@@ -1269,10 +1297,22 @@ export default function HomebuyingFinancialHealth() {
             )}
           </div>
           <div className="mb-8 flex flex-wrap gap-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/buyers/programs")}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const params = new URLSearchParams({
+                  state: selectedState.name,
+                  homePrice: String(monthly.homePrice),
+                  income: String(financialProfile.yearlyIncome),
+                  firstTime: String(financialProfile.isFirstTimeBuyer ?? true),
+                });
+                navigate(`/buyers/programs?${params.toString()}`);
+              }}
+            >
               Review loan programs
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/buyers")}>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/buyers?edit=1")}>
               Update my financial info
             </Button>
           </div>
@@ -1401,13 +1441,21 @@ function SimSlider({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between text-xs">
-        <Label>{label}</Label>
-        <span className="tabular-nums text-muted-foreground">{format(value)}</span>
+        <Label className="font-bold">{label}</Label>
+        <span className="tabular-nums font-bold opacity-90">{format(value)}</span>
       </div>
-      <Slider value={[value]} onValueChange={(v) => onChange(v[0])} min={min} max={max} step={step} />
+      <Slider
+        value={[value]}
+        onValueChange={(v) => onChange(v[0])}
+        min={min}
+        max={max}
+        step={step}
+        className="[&>span:first-child]:bg-primary-foreground/20 [&>span:first-child>span]:bg-primary-foreground [&_[role=slider]]:border-primary-foreground [&_[role=slider]]:bg-primary"
+      />
     </div>
   );
 }
+
 
 function SimResult({
   label,
@@ -1423,17 +1471,25 @@ function SimResult({
   const changed = value !== baseValue;
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm font-semibold opacity-80">{label}</span>
       <div className="text-right">
-        <p className={cn("font-serif text-base font-semibold tabular-nums", status && STATUS_META[status].textClass)}>
+        <p
+          className={cn(
+            "font-serif text-base font-bold tabular-nums",
+            // On the ink section, `text-primary` (ink) would be invisible.
+            status && STATUS_META[status].textClass.replace("text-primary", "text-primary-foreground"),
+          )}
+        >
+
           {value}
         </p>
         {changed && (
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+          <p className="text-[10px] font-semibold uppercase tracking-wide opacity-60">
             was {baseValue}
           </p>
         )}
       </div>
     </div>
+
   );
 }

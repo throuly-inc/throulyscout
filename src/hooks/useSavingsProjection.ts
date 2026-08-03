@@ -73,7 +73,7 @@ export interface SavingsProjection {
   readiness: ReadinessTargets;
 }
 
-function addMonths(base: Date, months: number): Date {
+export function addMonths(base: Date, months: number): Date {
   const d = new Date(base);
   d.setMonth(d.getMonth() + months);
   return d;
@@ -118,7 +118,9 @@ export function computeSavingsProjection(inputs: SavingsInputs): SavingsProjecti
 
   const goalProgress = goal > 0 ? Math.min(100, (currentSavings / goal) * 100) : 0;
   const monthlyNeededForTarget =
-    targetMonths > 0 && remaining > 0
+    goal <= 0
+      ? null
+      : targetMonths > 0 && remaining > 0
       ? Math.ceil(remaining / targetMonths)
       : remaining <= 0
       ? 0

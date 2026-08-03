@@ -154,7 +154,7 @@ const Auth = () => {
       } else {
         const redirectUrl = `${window.location.origin}/`;
         
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -172,6 +172,12 @@ const Auth = () => {
           } else {
             toast.error(error.message);
           }
+          return;
+        }
+
+        if (data?.user?.identities && data.user.identities.length === 0) {
+          toast.error("This email is already registered. Please sign in instead.");
+          setIsLogin(true);
           return;
         }
 

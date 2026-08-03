@@ -39,7 +39,7 @@ export function QualifyingPrograms({ stateName, homePrice, yearlyIncome, isFirst
     if (!stateName) return;
     setLoading(true);
     try {
-      const { data: result, error } = await supabase.functions.invoke("get-assistance-programs", {
+      const { data: result, error } = await supabase.functions.invoke("throulyscout-get-assistance-programs", {
         body: {
           state: stateName,
           propertyPrice: homePrice,

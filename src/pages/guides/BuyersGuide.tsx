@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Clock, HelpCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/seo/SEO";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import heroImage from "@/assets/guides/buyers-hero.jpg";
 import { isGuideFaqVisible } from "@/config/guideFaqVisibility";
 
@@ -159,7 +160,7 @@ const BuyersGuide = () => {
             <p className="text-white/80 mb-6 max-w-lg mx-auto">
               Find out what you can comfortably afford — no credit pull, no calls.
             </p>
-            <Link to="/buyers">
+            <Link to="/buyers" onClick={clearActiveBuyerSession}>
               <Button variant="secondary" size="lg" className="bg-white text-accent hover:bg-white/90">
                 Try the calculator
               </Button>

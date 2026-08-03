@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import {
   Home,
   Calculator,
@@ -100,6 +101,12 @@ const groups: { title: string; nodes: Node[] }[] = [
         icon: Bookmark,
       },
       {
+        label: "Saved analyses",
+        to: "/dashboard/client/saved-analyses",
+        desc: "Market analyses you've saved from the Analyzer.",
+        icon: MapPin,
+      },
+      {
         label: "Preferences & settings",
         to: "/settings/account",
         desc: "Notifications, privacy, and account.",
@@ -128,6 +135,7 @@ export function SiteMap() {
                 <div key={n.label} className="relative">
                   <Link
                     to={n.to}
+                    onClick={n.to === "/buyers" ? clearActiveBuyerSession : undefined}
                     className="flex items-start gap-3 rounded-lg border border-border/60 bg-background/60 p-3 hover:border-accent hover:bg-accent/5 transition-colors"
                   >
                     <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">

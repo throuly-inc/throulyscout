@@ -2,6 +2,7 @@ import { forwardRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, Phone, Home, Shield } from "lucide-react";
 import { ComingSoonModal } from "@/components/common/ComingSoonModal";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 const SocialIcon = ({ href, label, children }: { href: string; label: string; children: React.ReactNode }) => (
   <a
@@ -72,6 +73,7 @@ export const Footer = forwardRef<HTMLElement>((props, ref) => {
                 <li key={link.label}>
                   <Link
                     to={link.to}
+                    onClick={link.to === "/buyers" ? clearActiveBuyerSession : undefined}
                     className="transition-colors"
                     style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.60)" }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.95)")}
@@ -100,7 +102,7 @@ export const Footer = forwardRef<HTMLElement>((props, ref) => {
             <ul className="space-y-2">
               {[
                 { to: "/resources", label: "Guides" },
-                { to: "/", label: "API Access" },
+                { to: "/how-it-works", label: "How It Works" },
               ].map((link) => (
                 <li key={link.label}>
                   <Link
@@ -114,6 +116,18 @@ export const Footer = forwardRef<HTMLElement>((props, ref) => {
                   </Link>
                 </li>
               ))}
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setComingSoonLabel("API Access")}
+                  className="transition-colors text-left"
+                  style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.60)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.95)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.60)")}
+                >
+                  API Access
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -208,7 +222,7 @@ export const Footer = forwardRef<HTMLElement>((props, ref) => {
           }}
         >
           <p style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.35)" }}>
-            &copy; {new Date().getFullYear()} Throuly. All rights reserved.
+            &copy; {new Date().getFullYear()} throuly. All rights reserved.
           </p>
         </div>
       </div>

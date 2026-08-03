@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Clock, HelpCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/seo/SEO";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 const FAQ = [
   { q: "What's the difference between pre-approval and realistic affordability?", a: "Pre-approval is the maximum a lender will lend you based on debt-to-income ratios alone. Realistic affordability is what you can pay every month without giving up retirement contributions, travel, childcare, or a working emergency fund." },
@@ -148,7 +149,7 @@ const RealisticAffordability = () => {
             <p className="text-white/80 mb-6 max-w-lg mx-auto">
               Find out what you can comfortably afford — no credit pull, no calls.
             </p>
-            <Link to="/buyers">
+            <Link to="/buyers" onClick={clearActiveBuyerSession}>
               <Button variant="secondary" size="lg" className="bg-white text-accent hover:bg-white/90">
                 Try the calculator
               </Button>

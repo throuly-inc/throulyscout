@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/seo/SEO";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import { useAuth } from "@/hooks/useAuth";
 
 const popularGuides = [
@@ -127,7 +128,7 @@ const Resources = () => {
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           {/* Header */}
-          <div className="text-center max-w-2xl mx-auto mb-12">
+          <div className="text-center max-w-3xl mx-auto mb-12">
             <h1 className="font-serif text-4xl md:text-5xl text-foreground mb-4">
               Knowledge Center
             </h1>
@@ -138,7 +139,7 @@ const Resources = () => {
 
           {/* Tabs */}
           <Tabs defaultValue="guides" className="w-full">
-            <TabsList className="w-full max-w-md mx-auto mb-12 bg-transparent border-b border-border rounded-none h-auto p-0">
+            <TabsList className="flex w-full max-w-md mx-auto mb-12 bg-transparent border-b border-border rounded-none h-auto p-0">
               <TabsTrigger 
                 value="guides" 
                 className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-accent data-[state=active]:text-accent rounded-none bg-transparent py-3"
@@ -253,7 +254,7 @@ const Resources = () => {
                   <p className="text-white/80 mb-6">
                     Join the privacy-first real estate platform that puts you in control.
                   </p>
-                  <Link to="/buyers">
+                  <Link to="/buyers" onClick={clearActiveBuyerSession}>
                     <Button variant="secondary" className="bg-white text-accent hover:bg-white/90">
                       Start Exploring
                     </Button>

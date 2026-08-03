@@ -270,8 +270,34 @@ export const CREDIT_SCORE_RANGES = [
   { label: "Poor (580-619)", min: 580, max: 619 },
 ];
 
-export function getRateConfidenceBand(baseRate: number, loanType: LoanType): RateConfidenceBand {
-  const adjustedRate = baseRate + loanType.rateAdjustment;
+/**
+ * Rate delta (percentage points) applied on top of the state/loan-type base
+ * rate for a given credit tier. Mirrors the tier cutoffs used by
+ * `creditTier`/`scoreCredit` in financialHealth.ts. 700-719 is treated as the
+ * baseline (no adjustment) since state average rates are quoted for a
+ * roughly "good" credit borrower.
+ */
+export function creditRateAdjustment(creditScore: number): number {
+  if (creditScore >= 780) return -0.375;
+  if (creditScore >= 760) return -0.25;
+  if (creditScore >= 740) return -0.125;
+  if (creditScore >= 720) return -0.0625;
+  if (creditScore >= 700) return 0;
+  if (creditScore >= 680) return 0.25;
+  if (creditScore >= 660) return 0.5;
+  if (creditScore >= 640) return 0.875;
+  if (creditScore >= 620) return 1.25;
+  if (creditScore >= 580) return 1.75;
+  return 2.5;
+}
+
+export function getRateConfidenceBand(
+  baseRate: number,
+  loanType: LoanType,
+  creditScore?: number,
+): RateConfidenceBand {
+  const creditAdj = creditScore != null ? creditRateAdjustment(creditScore) : 0;
+  const adjustedRate = baseRate + loanType.rateAdjustment + creditAdj;
   return {
     low: Math.round((adjustedRate - 0.375) * 1000) / 1000,
     mid: Math.round(adjustedRate * 1000) / 1000,
@@ -366,8 +392,8 @@ export function calculateMortgage(
   const upfrontMIP = loanType.id === "fha" ? baseLoanAmount * 0.0175 : 0;
   const loanAmount = baseLoanAmount + upfrontMIP;
 
-  // Get rate range
-  const rateRange = getRateConfidenceBand(stateData.avgMortgageRate, loanType);
+  // Get rate range — credit tier shifts the band (better credit = lower rate)
+  const rateRange = getRateConfidenceBand(stateData.avgMortgageRate, loanType, financialProfile.creditScore);
   const effectiveRate = rateOverride ?? rateRange.mid;
 
   // Monthly mortgage payment (Principal & Interest) on full loan amount (including financed upfront MIP)
@@ -461,6 +487,7 @@ export function calculateMortgage(
     loanTermYears,
     loanType,
     rateOverride,
+    financialProfile.creditScore,
   );
 
   return {
@@ -499,6 +526,7 @@ function calculateMaxPrice(
   loanTermYears: number,
   loanType: LoanType,
   rateOverride?: number,
+  creditScore?: number,
 ): number {
   let low = 50000;
   let high = 3000000;
@@ -513,6 +541,7 @@ function calculateMaxPrice(
       loanTermYears,
       loanType,
       rateOverride,
+      creditScore,
     );
 
     if (monthlyPayment <= maxMonthlyPayment) {
@@ -533,6 +562,7 @@ function calculateMonthlyForPrice(
   loanTermYears: number,
   loanType: LoanType,
   rateOverride?: number,
+  creditScore?: number,
 ): number {
   const downPaymentAmount = homePrice * (downPaymentPercent / 100);
   const baseLoanAmount = homePrice - downPaymentAmount;
@@ -541,7 +571,7 @@ function calculateMonthlyForPrice(
   const upfrontMIP = loanType.id === "fha" ? baseLoanAmount * 0.0175 : 0;
   const loanAmount = baseLoanAmount + upfrontMIP;
 
-  const rateRange = getRateConfidenceBand(stateData.avgMortgageRate, loanType);
+  const rateRange = getRateConfidenceBand(stateData.avgMortgageRate, loanType, creditScore);
   const rate = rateOverride ?? rateRange.mid;
   const monthlyRate = rate / 100 / 12;
   const numPayments = loanTermYears * 12;

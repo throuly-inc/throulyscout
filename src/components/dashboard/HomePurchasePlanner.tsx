@@ -22,7 +22,7 @@ interface Props {
 
 export function HomePurchasePlanner({ userId = null, onSwitchTab }: Props) {
   const rm = useRoadmap(userId);
-  const [openPhase, setOpenPhase] = useState<PhaseId>("financial");
+  const [openPhase, setOpenPhase] = useState<PhaseId | "">("financial");
 
   useEffect(() => {
     if (!rm.loading) setOpenPhase(rm.currentPhase.id);

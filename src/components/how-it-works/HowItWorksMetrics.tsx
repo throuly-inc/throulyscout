@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Clock, MapPin, BadgeCheck } from "lucide-react";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 
 const INK = "#0c0e1a";
 const CREAM = "#f7f4ee";
@@ -190,7 +191,7 @@ export function HowItWorksMetrics() {
       </p>
 
       <div style={{ textAlign: "center", marginTop: "2rem" }}>
-        <Link to="/buyers">
+        <Link to="/buyers" onClick={clearActiveBuyerSession}>
           <button
             className="transition-all duration-200"
             style={{

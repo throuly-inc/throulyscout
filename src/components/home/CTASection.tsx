@@ -109,7 +109,7 @@ export function CTASection() {
                   e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,255,255,0.1)';
                 }}
               >
-                Get Started Free <ArrowRight className="w-4 h-4 inline ml-1" />
+                Get started for free <ArrowRight className="w-4 h-4 inline ml-1" />
               </button>
             </Link>
             <Link to="/resources">

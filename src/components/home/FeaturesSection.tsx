@@ -1,5 +1,6 @@
 import { Search, CheckCircle, BarChart3, Shield, DollarSign, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { clearActiveBuyerSession } from "@/lib/buyerSessionStorage";
 import buyerLifestyle from "@/assets/buyer-lifestyle.jpg";
 
 const features = [
@@ -155,7 +156,7 @@ export function FeaturesSection() {
         </div>
 
         <div className="text-center">
-          <Link to="/buyers">
+          <Link to="/buyers" onClick={clearActiveBuyerSession}>
             <button
               className="transition-all duration-200"
               style={{

@@ -33,7 +33,7 @@ export default function PropertyDashboard() {
       
       if (user) {
         // Check subscription status
-        const { data, error } = await supabase.functions.invoke('check-subscription');
+        const { data, error } = await supabase.functions.invoke('throulyscout-check-subscription');
         if (!error && data) {
           setSubscription(data);
         }
@@ -47,7 +47,7 @@ export default function PropertyDashboard() {
 
   const handleUpgrade = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
+      const { data, error } = await supabase.functions.invoke('throulyscout-create-checkout', {
         body: { priceId: 'price_premium_buyer' } // This should be your actual Stripe price ID
       });
       
