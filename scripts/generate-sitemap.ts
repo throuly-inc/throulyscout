@@ -6,7 +6,7 @@ import { resolve } from "path";
 // @ts-ignore relative to project root
 import { statesData } from "../src/lib/states";
 
-const BASE_URL = "https://throuly.com";
+const BASE_URL = "https://throulyscout.com";
 
 const SITE_LASTMOD = "2026-07-10";
 
@@ -24,8 +24,8 @@ const entries: SitemapEntry[] = [
 
   // Segment landing pages
   { path: "/scout", lastmod: SITE_LASTMOD, changefreq: "weekly", priority: "0.9" },
-  { path: "/list", lastmod: SITE_LASTMOD, changefreq: "weekly", priority: "0.9" },
-  { path: "/compass", lastmod: SITE_LASTMOD, changefreq: "weekly", priority: "0.9" },
+  { path: "/how-it-works", lastmod: SITE_LASTMOD, changefreq: "monthly", priority: "0.7" },
+  { path: "/trust", lastmod: SITE_LASTMOD, changefreq: "monthly", priority: "0.6" },
 
   // Buyer journey
   { path: "/buyers", lastmod: SITE_LASTMOD, changefreq: "weekly", priority: "0.9" },
@@ -40,10 +40,6 @@ const entries: SitemapEntry[] = [
 
   // Connect (privacy-first matching)
 
-  // Account entry points
-  { path: "/auth", lastmod: SITE_LASTMOD, changefreq: "monthly", priority: "0.4" },
-  { path: "/saved", lastmod: SITE_LASTMOD, changefreq: "weekly", priority: "0.5" },
-
   // Resources + entry points
   { path: "/resources", lastmod: SITE_LASTMOD, changefreq: "monthly", priority: "0.6" },
   { path: "/news", lastmod: SITE_LASTMOD, changefreq: "weekly", priority: "0.6" },
@@ -51,9 +47,9 @@ const entries: SitemapEntry[] = [
 
   // Guides (blog-style, authored by The throuly Team)
   { path: "/guides/buyers", lastmod: "2026-03-14", changefreq: "monthly", priority: "0.6" },
-  { path: "/guides/sellers", lastmod: SITE_LASTMOD, changefreq: "monthly", priority: "0.6" },
   { path: "/guides/investors", lastmod: "2026-05-16", changefreq: "monthly", priority: "0.6" },
   { path: "/guides/realistic-affordability", lastmod: "2026-06-20", changefreq: "monthly", priority: "0.7" },
+  { path: "/guides/smart-buyer-strategies", lastmod: SITE_LASTMOD, changefreq: "monthly", priority: "0.6" },
 
   // State-specific buyer program guides (50 states)
   ...statesData.map((s) => ({

@@ -1,5 +1,4 @@
 import { Helmet } from "react-helmet-async";
-import ogLogo from "@/assets/throuly-logo.png.asset.json";
 
 interface SEOProps {
   title: string;
@@ -11,8 +10,8 @@ interface SEOProps {
   noindex?: boolean;
 }
 
-const SITE = "https://throuly.com";
-const DEFAULT_OG_IMAGE = `${SITE}${ogLogo.url}`;
+const SITE = "https://throulyscout.com";
+const DEFAULT_OG_IMAGE = `${SITE}/og-image.webp`;
 
 export function SEO({ title, description, path, ogType = "website", image = DEFAULT_OG_IMAGE, jsonLd, noindex = false }: SEOProps) {
   const url = `${SITE}${path}`;

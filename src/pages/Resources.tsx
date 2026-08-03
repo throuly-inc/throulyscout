@@ -111,15 +111,15 @@ const Resources = () => {
           "@type": "CollectionPage",
           name: "throuly Knowledge Center",
           description: "Guides, calculators, and tools for buyers and investors.",
-          url: "https://throuly.com/resources",
-          isPartOf: { "@type": "WebSite", name: "throuly", url: "https://throuly.com/" },
+          url: "https://throulyscout.com/resources",
+          isPartOf: { "@type": "WebSite", name: "throuly", url: "https://throulyscout.com/" },
           hasPart: popularGuides
             .filter((g) => !g.gated)
             .map((g) => ({
               "@type": "Article",
               headline: g.title,
               description: g.description,
-              url: `https://throuly.com${g.link}`,
+              url: `https://throulyscout.com${g.link}`,
             })),
         }}
       />

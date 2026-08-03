@@ -325,7 +325,7 @@ const Buyers = () => {
           applicationCategory: "FinanceApplication",
           operatingSystem: "Web",
           description: "A privacy-first home affordability calculator that estimates your buying power, monthly payment, and down payment across all 50 U.S. states.",
-          url: "https://throuly.com/buyers",
+          url: "https://throulyscout.com/buyers",
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         }}
       />

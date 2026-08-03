@@ -48,7 +48,7 @@ const Scout = () => {
           applicationCategory: "FinanceApplication",
           operatingSystem: "Web",
           description: "A private, 50-state home affordability calculator and property search for buyers.",
-          url: "https://throuly.com/scout",
+          url: "https://throulyscout.com/scout",
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         }}
       />

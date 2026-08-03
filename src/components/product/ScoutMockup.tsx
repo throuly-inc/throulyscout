@@ -114,7 +114,7 @@ export function ScoutMockup() {
             color: '#787a92',
           }}
         >
-          throuly.com/scout
+          throulyscout.com/scout
         </div>
       </div>
 

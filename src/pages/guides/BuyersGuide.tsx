@@ -37,10 +37,10 @@ const BuyersGuide = () => {
             headline: "The Quiet Way to Buy a Home",
             description: "A privacy-first homebuying playbook from the throuly team.",
             datePublished: "2026-03-14",
-            image: `https://throuly.com${heroImage}`,
+            image: `https://throulyscout.com${heroImage}`,
             author: { "@type": "Organization", name: "The throuly Team" },
-            publisher: { "@type": "Organization", name: "throuly", logo: { "@type": "ImageObject", url: "https://throuly.com/favicon.png" } },
-            mainEntityOfPage: "https://throuly.com/guides/buyers",
+            publisher: { "@type": "Organization", name: "throuly", logo: { "@type": "ImageObject", url: "https://throulyscout.com/favicon-v2.png" } },
+            mainEntityOfPage: "https://throulyscout.com/guides/buyers",
           },
           ...(SHOW_FAQ
             ? [

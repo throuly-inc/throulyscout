@@ -37,10 +37,10 @@ const InvestorsGuide = () => {
             headline: "Cap Rates, Yields, and Real Returns",
             description: "A working investor's primer on cap rate, NOI, and cash-on-cash return.",
             datePublished: "2026-05-16",
-            image: `https://throuly.com${heroImage}`,
+            image: `https://throulyscout.com${heroImage}`,
             author: { "@type": "Organization", name: "The throuly Team" },
-            publisher: { "@type": "Organization", name: "throuly", logo: { "@type": "ImageObject", url: "https://throuly.com/favicon.png" } },
-            mainEntityOfPage: "https://throuly.com/guides/investors",
+            publisher: { "@type": "Organization", name: "throuly", logo: { "@type": "ImageObject", url: "https://throulyscout.com/favicon-v2.png" } },
+            mainEntityOfPage: "https://throulyscout.com/guides/investors",
           },
           ...(SHOW_FAQ
             ? [
