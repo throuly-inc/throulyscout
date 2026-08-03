@@ -1,0 +1,33 @@
+name: Deploy production
+
+# Production deploys only happen when a version tag is pushed (e.g. v1.2.0),
+# either via `git push origin v1.2.0` or by publishing a GitHub Release.
+# Staging deploys are handled by Netlify's Git integration on merges to main.
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build and deploy to Netlify production site
+        run: npx netlify-cli deploy --prod --message "Release ${GITHUB_REF_NAME}"
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          # Netlify site ID for the production site (throulyscout)
+          NETLIFY_SITE_ID: c519a561-43b9-46d1-be4b-c94a9379c224
