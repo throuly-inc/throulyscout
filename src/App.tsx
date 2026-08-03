@@ -16,6 +16,7 @@ import Welcome from "./pages/Welcome";
 import Resources from "./pages/Resources";
 import News from "./pages/News";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Analyzer from "./pages/Analyzer";
 import NotFound from "./pages/NotFound";
 import SavedScenarios from "./pages/SavedScenarios";
@@ -67,6 +68,7 @@ const App = () => (
                 <Route path="/resources" element={<Resources />} />
                 <Route path="/news" element={<News />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/analyzer" element={<Analyzer />} />
                 <Route path="/saved" element={<SavedScenarios />} />
                 <Route path="/guides/buyers" element={<BuyersGuide />} />

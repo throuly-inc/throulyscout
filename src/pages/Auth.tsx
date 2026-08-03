@@ -47,6 +47,11 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
+  const [forgotMode, setForgotMode] = useState(searchParams.get("mode") === "forgot");
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetEmailError, setResetEmailError] = useState("");
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const redirectUser = async (userId: string) => {
     const returnTo = searchParams.get("returnTo");
@@ -191,6 +196,101 @@ const Auth = () => {
     }
   };
 
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const result = authSchema.shape.email.safeParse(resetEmail);
+    if (!result.success) {
+      setResetEmailError(result.error.errors[0]?.message ?? "Please enter a valid email address");
+      return;
+    }
+    setResetEmailError("");
+    setResetLoading(true);
+
+    try {
+      await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+    } finally {
+      // Always show the same confirmation whether or not the email is
+      // registered, so this can't be used to enumerate accounts.
+      setResetLoading(false);
+      setResetSent(true);
+    }
+  };
+
+  const forgotPasswordCard = resetSent ? (
+    <div className="text-center space-y-4">
+      <h1 className="text-2xl font-semibold text-foreground mb-2">Check your email</h1>
+      <p className="text-muted-foreground text-sm">
+        If an account exists for <span className="font-medium text-foreground">{resetEmail}</span>,
+        we've sent a link to reset your password.
+      </p>
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={() => {
+          setForgotMode(false);
+          setResetSent(false);
+          setResetEmail("");
+        }}
+      >
+        Back to sign in
+      </Button>
+    </div>
+  ) : (
+    <>
+      <div className="text-center mb-8">
+        <h1 className="text-2xl font-semibold text-foreground mb-2">Reset your password</h1>
+        <p className="text-muted-foreground text-sm">
+          Enter your email and we'll send you a link to reset your password.
+        </p>
+      </div>
+
+      <form onSubmit={handleForgotSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="resetEmail" className="text-sm text-foreground">
+            Email
+          </Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              id="resetEmail"
+              type="email"
+              placeholder="you@example.com"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          {resetEmailError && (
+            <p className="text-xs text-destructive">{resetEmailError}</p>
+          )}
+        </div>
+
+        <Button
+          type="submit"
+          variant="hero"
+          className="w-full"
+          size="lg"
+          disabled={resetLoading}
+        >
+          {resetLoading ? "Sending..." : "Send reset link"}
+        </Button>
+      </form>
+
+      <div className="mt-6 text-center">
+        <button
+          type="button"
+          onClick={() => setForgotMode(false)}
+          className="text-sm text-accent hover:underline font-medium"
+        >
+          Back to sign in
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
@@ -203,15 +303,16 @@ const Auth = () => {
       <main className="pt-32 pb-24 px-4">
         <div className="container mx-auto max-w-md">
           <div className="bg-card border border-border rounded-2xl p-8 shadow-lg">
-
+            {forgotMode ? forgotPasswordCard : (
+            <>
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-2xl font-semibold text-foreground mb-2">
                 {isLogin ? "Welcome Back" : "Create Account"}
               </h1>
               <p className="text-muted-foreground text-sm">
-                {isLogin 
-                  ? "Sign in to access your dashboard" 
+                {isLogin
+                  ? "Sign in to access your dashboard"
                   : "Join throuly to get started"}
               </p>
             </div>
@@ -261,9 +362,20 @@ const Auth = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm text-foreground">
-                  Password
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-sm text-foreground">
+                    Password
+                  </Label>
+                  {isLogin && (
+                    <button
+                      type="button"
+                      onClick={() => setForgotMode(true)}
+                      className="text-xs text-accent hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -330,6 +442,8 @@ const Auth = () => {
                 </button>
               </p>
             </div>
+            </>
+            )}
           </div>
         </div>
       </main>
