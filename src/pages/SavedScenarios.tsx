@@ -76,7 +76,15 @@ const SavedScenarios = () => {
         .from("saved_results")
         .select("*")
         .order("created_at", { ascending: false })
-        .then(({ data }) => {
+        .then(({ data, error }) => {
+          if (error) {
+            toast({
+              title: "Couldn't load saved scenarios",
+              description: "Your cloud scenarios may be incomplete. Try refreshing.",
+              variant: "destructive",
+            });
+            return;
+          }
           if (data) setCloudScenarios(data);
         });
     }

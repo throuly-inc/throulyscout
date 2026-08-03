@@ -34,10 +34,12 @@ export function QualifyingPrograms({ stateName, homePrice, yearlyIncome, isFirst
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
   const [expanded, setExpanded] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const fetchPrograms = async () => {
     if (!stateName) return;
     setLoading(true);
+    setErrorMessage(null);
     try {
       const { data: result, error } = await supabase.functions.invoke("throulyscout-get-assistance-programs", {
         body: {
@@ -51,9 +53,15 @@ export function QualifyingPrograms({ stateName, homePrice, yearlyIncome, isFirst
         const list = result.programs || [];
         setPrograms(list);
         onProgramsLoaded?.(list);
+      } else {
+        // Surface server-provided messages (e.g. monthly quota reached),
+        // otherwise a generic retryable error.
+        setErrorMessage(
+          typeof result?.error === "string" ? result.error : "Couldn't load programs right now."
+        );
       }
     } catch {
-      // silently fail
+      setErrorMessage("Couldn't load programs right now.");
     } finally {
       setLoading(false);
       setFetched(true);
@@ -142,6 +150,16 @@ export function QualifyingPrograms({ stateName, homePrice, yearlyIncome, isFirst
                   )}
                 </Card>
               ))}
+            </div>
+          ) : errorMessage ? (
+            <div className="text-center py-4">
+              <p className="text-xs text-muted-foreground mb-2">{errorMessage}</p>
+              <button
+                onClick={fetchPrograms}
+                className="text-xs text-primary hover:underline"
+              >
+                Try again
+              </button>
             </div>
           ) : fetched ? (
             <p className="text-xs text-muted-foreground text-center py-4">

@@ -137,7 +137,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
-  if (ctx) return ctx;
-  // Fallback (should not happen if AuthProvider is mounted at root)
-  return useAuthState();
+  if (!ctx) {
+    // Calling useAuthState() here conditionally would violate the Rules of
+    // Hooks (hook count changes between renders). AuthProvider is mounted at
+    // the app root, so a missing context is a programming error — fail loudly.
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return ctx;
 }
