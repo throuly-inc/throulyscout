@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { createUserClient } from "../_shared/supabase.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -38,11 +38,7 @@ serve(async (req) => {
       );
     }
 
-    const userClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } }, db: { schema: "throulyscout" } }
-    );
+    const userClient = createUserClient(authHeader);
 
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await userClient.auth.getUser(token);

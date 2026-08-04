@@ -4,7 +4,7 @@
 // - Normalizes email and silently collapses duplicates
 // - Always returns a generic success response
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { createServiceClient } from "../_shared/supabase.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -86,11 +86,7 @@ serve(async (req) => {
     const ok = await verifyTurnstile(turnstileToken, ip);
     if (!ok) return generic();
 
-    const svc = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { db: { schema: "throulyscout" } }
-    );
+    const svc = createServiceClient();
 
     if (list === "waitlist") {
       // ON CONFLICT silently collapses duplicates via unique normalized_email index

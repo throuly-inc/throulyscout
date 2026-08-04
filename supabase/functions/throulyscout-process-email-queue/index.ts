@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@supabase/supabase-js@2'
+import { createServiceClient, type ServiceClient } from '../_shared/supabase.ts'
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
@@ -120,7 +120,7 @@ function parseJwtClaims(token: string): Record<string, unknown> | null {
 
 // Move a message to the dead letter queue and log the reason.
 async function moveToDlq(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ServiceClient,
   queue: string,
   msg: { msg_id: number; message: Record<string, unknown> },
   reason: string
@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
     )
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey, { db: { schema: 'throulyscout' } })
+  const supabase = createServiceClient()
 
   // 1. Check rate-limit cooldown and read queue config
   const { data: state } = await supabase
