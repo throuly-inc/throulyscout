@@ -1,0 +1,12 @@
+-- Restore table-level UPDATE on profiles for the API roles, matching prod.
+--
+-- 20260314225117 revoked UPDATE and re-granted only 5 columns, but production
+-- was later re-granted full table UPDATE (a Lovable-era change that never made
+-- it into this repo). Without it, any profile update touching other columns
+-- (e.g. onboarding_complete from the dashboard) fails with
+-- "permission denied for table profiles".
+--
+-- This is safe: RLS restricts updates to the user's own row, and the
+-- BEFORE UPDATE triggers (block_privilege_changes, strict_prevent_role_change)
+-- reject changes to privileged columns like subscription_tier and role.
+GRANT UPDATE ON throulyscout.profiles TO anon, authenticated;
