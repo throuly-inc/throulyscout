@@ -1,9 +1,10 @@
+set search_path = throulyscout, public, extensions;
+
 -- The 'throulyscout-avatars' storage bucket existed (created outside migration
--- history during a rebrand from 'avatars' -> 'throuly-avatars' -> 'throulyscout-avatars')
--- but never got an RLS policy, so every upload was denied with "new row
--- violates row-level security policy" for every user. Add an owner-scoped
--- write policy matching the existing pattern used for the original 'avatars'
--- bucket (avatars_owner_write).
+-- history during a rebrand) but never got an RLS policy, so every upload was
+-- denied with "new row violates row-level security policy" for every user.
+-- Add an owner-scoped write policy matching the existing avatars pattern
+-- (avatars_owner_write).
 
 DROP POLICY IF EXISTS "throulyscout_avatars_owner_write" ON storage.objects;
 

@@ -1,3 +1,5 @@
+set search_path = throulyscout, public, extensions;
+
 
 -- Revoke default PUBLIC execute on all SECURITY DEFINER functions, then re-grant narrowly.
 
@@ -22,8 +24,8 @@ DECLARE
   ];
 BEGIN
   FOREACH fn IN ARRAY trigger_only LOOP
-    EXECUTE format('REVOKE ALL ON FUNCTION public.%s FROM PUBLIC, anon, authenticated', fn);
-    EXECUTE format('GRANT EXECUTE ON FUNCTION public.%s TO service_role', fn);
+    EXECUTE format('REVOKE ALL ON FUNCTION throulyscout.%s FROM PUBLIC, anon, authenticated', fn);
+    EXECUTE format('GRANT EXECUTE ON FUNCTION throulyscout.%s TO service_role', fn);
   END LOOP;
 END $$;
 
@@ -65,8 +67,8 @@ DECLARE
   ];
 BEGIN
   FOREACH fn IN ARRAY auth_only LOOP
-    EXECUTE format('REVOKE ALL ON FUNCTION public.%s FROM PUBLIC, anon', fn);
-    EXECUTE format('GRANT EXECUTE ON FUNCTION public.%s TO authenticated, service_role', fn);
+    EXECUTE format('REVOKE ALL ON FUNCTION throulyscout.%s FROM PUBLIC, anon', fn);
+    EXECUTE format('GRANT EXECUTE ON FUNCTION throulyscout.%s TO authenticated, service_role', fn);
   END LOOP;
 END $$;
 
@@ -83,7 +85,7 @@ DECLARE
   ];
 BEGIN
   FOREACH fn IN ARRAY public_fns LOOP
-    EXECUTE format('REVOKE ALL ON FUNCTION public.%s FROM PUBLIC', fn);
-    EXECUTE format('GRANT EXECUTE ON FUNCTION public.%s TO anon, authenticated, service_role', fn);
+    EXECUTE format('REVOKE ALL ON FUNCTION throulyscout.%s FROM PUBLIC', fn);
+    EXECUTE format('GRANT EXECUTE ON FUNCTION throulyscout.%s TO anon, authenticated, service_role', fn);
   END LOOP;
 END $$;

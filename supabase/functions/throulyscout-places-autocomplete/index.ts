@@ -1,5 +1,5 @@
 // Google Places Autocomplete proxy (keeps API key server-side)
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { createUserClient } from "../_shared/supabase.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,10 +23,7 @@ Deno.serve(async (req) => {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-  const sb = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-  );
+  const sb = createUserClient();
   const { data: userData, error: userErr } = await sb.auth.getUser(authHeader.replace("Bearer ", ""));
   if (userErr || !userData.user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {

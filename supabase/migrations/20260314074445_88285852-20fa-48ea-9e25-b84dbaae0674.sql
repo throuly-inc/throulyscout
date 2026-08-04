@@ -1,18 +1,20 @@
+set search_path = throulyscout, public, extensions;
+
 
 -- =====================================================
 -- FIX 1: Prevent role escalation on profiles table
 -- =====================================================
 
 -- Drop the overly permissive update policy
-DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON throulyscout.profiles;
 
 -- Create a restricted update policy that only allows safe field changes
 -- We use a trigger approach since WITH CHECK cannot reference OLD in Supabase
-CREATE OR REPLACE FUNCTION public.prevent_role_escalation()
+CREATE OR REPLACE FUNCTION throulyscout.prevent_role_escalation()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = throulyscout
 AS $$
 BEGIN
   -- Prevent users from changing protected fields via client updates
@@ -36,26 +38,26 @@ END;
 $$;
 
 -- Attach trigger to profiles
-DROP TRIGGER IF EXISTS prevent_role_escalation_trigger ON public.profiles;
+DROP TRIGGER IF EXISTS prevent_role_escalation_trigger ON throulyscout.profiles;
 CREATE TRIGGER prevent_role_escalation_trigger
-  BEFORE UPDATE ON public.profiles
+  BEFORE UPDATE ON throulyscout.profiles
   FOR EACH ROW
-  EXECUTE FUNCTION public.prevent_role_escalation();
+  EXECUTE FUNCTION throulyscout.prevent_role_escalation();
 
 -- Re-create the update policy (simple ownership check; trigger handles field restrictions)
 CREATE POLICY "Users can update own profile"
-  ON public.profiles
+  ON throulyscout.profiles
   FOR UPDATE
   TO authenticated
   USING (auth.uid() = id)
   WITH CHECK (auth.uid() = id);
 
 -- Create secure onboarding function
-CREATE OR REPLACE FUNCTION public.set_user_role(new_role text)
+CREATE OR REPLACE FUNCTION throulyscout.set_user_role(new_role text)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = throulyscout
 AS $$
 DECLARE
   current_onboarding boolean;
@@ -67,7 +69,7 @@ BEGIN
 
   -- Check onboarding status
   SELECT onboarding_complete INTO current_onboarding
-  FROM public.profiles
+  FROM throulyscout.profiles
   WHERE id = auth.uid();
 
   IF current_onboarding IS NULL THEN
@@ -79,7 +81,7 @@ BEGIN
   END IF;
 
   -- Update role and mark onboarding complete (bypasses trigger via SECURITY DEFINER)
-  UPDATE public.profiles
+  UPDATE throulyscout.profiles
   SET role = new_role, onboarding_complete = true, updated_at = now()
   WHERE id = auth.uid();
 END;
@@ -90,10 +92,10 @@ $$;
 -- =====================================================
 
 -- Fix seller_match_listings: require authentication, hide sensitive fields via RLS
-DROP POLICY IF EXISTS "Active listings are publicly viewable" ON public.seller_match_listings;
+DROP POLICY IF EXISTS "Active listings are publicly viewable" ON throulyscout.seller_match_listings;
 
 CREATE POLICY "Authenticated users can view active listings"
-  ON public.seller_match_listings
+  ON throulyscout.seller_match_listings
   FOR SELECT
   TO authenticated
   USING (is_active = true);
@@ -102,10 +104,10 @@ CREATE POLICY "Authenticated users can view active listings"
 -- This policy already exists: "Users can update own seller listings" etc.
 
 -- Fix sellers table: require authentication
-DROP POLICY IF EXISTS "Sellers are publicly readable" ON public.sellers;
+DROP POLICY IF EXISTS "Sellers are publicly readable" ON throulyscout.sellers;
 
 CREATE POLICY "Authenticated users can view active sellers"
-  ON public.sellers
+  ON throulyscout.sellers
   FOR SELECT
   TO authenticated
   USING (is_active = true);
@@ -127,16 +129,16 @@ CREATE POLICY "Authenticated users can view active sellers"
 -- but the table structure already requires non-null fields, so this is OK.
 
 -- However, let's add a read policy so recipients can also read messages sent to them
-DROP POLICY IF EXISTS "Anyone can send anonymous messages" ON public.anonymous_messages;
+DROP POLICY IF EXISTS "Anyone can send anonymous messages" ON throulyscout.anonymous_messages;
 
 CREATE POLICY "Authenticated users can send anonymous messages"
-  ON public.anonymous_messages
+  ON throulyscout.anonymous_messages
   FOR INSERT
   TO authenticated
   WITH CHECK (sender_user_id = auth.uid());
 
 CREATE POLICY "Anon users can send anonymous messages"
-  ON public.anonymous_messages
+  ON throulyscout.anonymous_messages
   FOR INSERT
   TO anon
   WITH CHECK (sender_user_id IS NULL);

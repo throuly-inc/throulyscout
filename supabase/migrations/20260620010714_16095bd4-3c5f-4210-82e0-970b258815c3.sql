@@ -1,5 +1,7 @@
+set search_path = throulyscout, public, extensions;
+
 -- 1) Drop the third-party API key column from offer_templates
-ALTER TABLE public.offer_templates DROP COLUMN IF EXISTS resend_api_key;
+ALTER TABLE throulyscout.offer_templates DROP COLUMN IF EXISTS resend_api_key;
 
 -- 2) Strict authorization on realtime.messages (broadcast/presence)
 -- On newer Supabase projects the postgres role cannot alter realtime.messages

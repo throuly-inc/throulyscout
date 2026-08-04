@@ -1,3 +1,5 @@
+set search_path = throulyscout, public, extensions;
+
 
 -- FIX 1: Prevent role escalation via strict trigger
 

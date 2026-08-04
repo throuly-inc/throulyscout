@@ -1,9 +1,11 @@
+set search_path = throulyscout, public, extensions;
+
 
 -- 1. Create notifications table
-CREATE TABLE public.notifications (
+CREATE TABLE throulyscout.notifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
-  deal_id uuid REFERENCES public.deals(id) ON DELETE CASCADE,
+  deal_id uuid REFERENCES throulyscout.deals(id) ON DELETE CASCADE,
   title text NOT NULL,
   message text NOT NULL,
   is_read boolean NOT NULL DEFAULT false,
@@ -11,35 +13,35 @@ CREATE TABLE public.notifications (
 );
 
 -- 2. Enable RLS
-ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE throulyscout.notifications ENABLE ROW LEVEL SECURITY;
 
 -- 3. Users can read own notifications
 CREATE POLICY "Users can read own notifications"
-  ON public.notifications FOR SELECT
+  ON throulyscout.notifications FOR SELECT
   TO authenticated
   USING (user_id = auth.uid());
 
 -- 4. Users can update own notifications (mark read)
 CREATE POLICY "Users can update own notifications"
-  ON public.notifications FOR UPDATE
+  ON throulyscout.notifications FOR UPDATE
   TO authenticated
   USING (user_id = auth.uid());
 
 -- 5. Allow system inserts via trigger (security definer function)
 CREATE POLICY "System can insert notifications"
-  ON public.notifications FOR INSERT
+  ON throulyscout.notifications FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
 -- 6. Enable realtime
-ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+ALTER PUBLICATION supabase_realtime ADD TABLE throulyscout.notifications;
 
 -- 7. Trigger function: when deal.stage changes, notify the client
-CREATE OR REPLACE FUNCTION public.notify_client_on_stage_change()
+CREATE OR REPLACE FUNCTION throulyscout.notify_client_on_stage_change()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = throulyscout
 AS $$
 DECLARE
   stage_label text;
@@ -62,7 +64,7 @@ BEGIN
       ELSE NEW.stage
     END;
 
-    INSERT INTO public.notifications (user_id, deal_id, title, message)
+    INSERT INTO throulyscout.notifications (user_id, deal_id, title, message)
     VALUES (
       NEW.client_id,
       NEW.id,
@@ -77,6 +79,6 @@ $$;
 
 -- 8. Attach trigger to deals table
 CREATE TRIGGER trg_deal_stage_change
-  AFTER UPDATE ON public.deals
+  AFTER UPDATE ON throulyscout.deals
   FOR EACH ROW
-  EXECUTE FUNCTION public.notify_client_on_stage_change();
+  EXECUTE FUNCTION throulyscout.notify_client_on_stage_change();

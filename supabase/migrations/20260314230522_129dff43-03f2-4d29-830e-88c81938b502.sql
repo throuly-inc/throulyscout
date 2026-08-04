@@ -1,12 +1,14 @@
+set search_path = throulyscout, public, extensions;
+
 
 -- Remove the overly broad policy that defeats the purpose
-DROP POLICY IF EXISTS "All authenticated can view active sellers via view" ON public.sellers;
+DROP POLICY IF EXISTS "All authenticated can view active sellers via view" ON throulyscout.sellers;
 
 -- Drop the security_invoker view since it can't bypass RLS
-DROP VIEW IF EXISTS public.public_sellers;
+DROP VIEW IF EXISTS throulyscout.public_sellers;
 
 -- Create a SECURITY DEFINER function that returns safe seller data
-CREATE OR REPLACE FUNCTION public.get_public_sellers()
+CREATE OR REPLACE FUNCTION throulyscout.get_public_sellers()
 RETURNS TABLE (
   id uuid,
   city text,
@@ -23,9 +25,9 @@ RETURNS TABLE (
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path TO 'public'
+SET search_path TO 'throulyscout'
 AS $$
   SELECT id, city, state, zip_code, property_type, listing_price, bedrooms, bathrooms, square_feet, description, created_at
-  FROM public.sellers
+  FROM throulyscout.sellers
   WHERE is_active = true;
 $$;

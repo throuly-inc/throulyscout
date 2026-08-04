@@ -1,1 +1,12 @@
-project_id = "wtznuiafkzcyruvavlow"
+# Local project identifier (used for naming local dev containers).
+# Remote linking is done via `supabase link --project-ref <ref>`:
+#   staging: ixjgqpfxpyuuymrwrnxg  ·  production: bruexgxnmuquaqsgezhb
+project_id = "throulyscout"
+
+[api]
+# The app lives in the "throulyscout" Postgres schema (in production the
+# Supabase project is shared with the main Throuly app, so each app is
+# namespaced by schema). It must be exposed to PostgREST for the frontend
+# client, which is configured with { db: { schema: 'throulyscout' } }.
+schemas = ["public", "graphql_public", "throulyscout"]
+extra_search_path = ["public", "extensions"]

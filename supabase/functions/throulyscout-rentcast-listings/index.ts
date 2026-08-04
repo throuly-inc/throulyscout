@@ -47,7 +47,7 @@ const fetchListings = async (url: string) => {
   return Array.isArray(data) ? data : [];
 };
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { createUserClient } from "../_shared/supabase.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -60,10 +60,7 @@ Deno.serve(async (req) => {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-    );
+    const supabase = createUserClient();
     const { data: u, error: ue } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
     if (ue || !u.user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {

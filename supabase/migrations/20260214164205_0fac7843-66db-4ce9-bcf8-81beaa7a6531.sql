@@ -1,6 +1,8 @@
+set search_path = throulyscout, public, extensions;
+
 
 -- Create anonymous_messages table for masked messaging
-CREATE TABLE public.anonymous_messages (
+CREATE TABLE throulyscout.anonymous_messages (
   id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   sender_alias text NOT NULL,
   recipient_type text NOT NULL CHECK (recipient_type IN ('agent', 'lender', 'seller')),
@@ -13,16 +15,16 @@ CREATE TABLE public.anonymous_messages (
 );
 
 -- Enable RLS
-ALTER TABLE public.anonymous_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE throulyscout.anonymous_messages ENABLE ROW LEVEL SECURITY;
 
 -- Anyone can insert (privacy-first: no sign-in required)
 CREATE POLICY "Anyone can send anonymous messages"
-ON public.anonymous_messages
+ON throulyscout.anonymous_messages
 FOR INSERT
 WITH CHECK (true);
 
 -- Senders can read their own messages (if signed in)
 CREATE POLICY "Senders can view own messages"
-ON public.anonymous_messages
+ON throulyscout.anonymous_messages
 FOR SELECT
 USING (auth.uid() = sender_user_id);

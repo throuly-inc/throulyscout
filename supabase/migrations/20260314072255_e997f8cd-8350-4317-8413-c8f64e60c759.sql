@@ -1,8 +1,10 @@
+set search_path = throulyscout, public, extensions;
+
 
 -- Agent Directory table
-CREATE TABLE public.agent_directory (
+CREATE TABLE throulyscout.agent_directory (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+  user_id uuid REFERENCES throulyscout.profiles(id) ON DELETE SET NULL,
   name text NOT NULL,
   email text NOT NULL,
   phone text,
@@ -20,16 +22,16 @@ CREATE TABLE public.agent_directory (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-ALTER TABLE public.agent_directory ENABLE ROW LEVEL SECURITY;
+ALTER TABLE throulyscout.agent_directory ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Agent directory is publicly readable"
-  ON public.agent_directory FOR SELECT
+  ON throulyscout.agent_directory FOR SELECT
   TO public USING (true);
 
 -- Lender Directory table
-CREATE TABLE public.lender_directory (
+CREATE TABLE throulyscout.lender_directory (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+  user_id uuid REFERENCES throulyscout.profiles(id) ON DELETE SET NULL,
   name text NOT NULL,
   email text NOT NULL,
   phone text,
@@ -49,18 +51,18 @@ CREATE TABLE public.lender_directory (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-ALTER TABLE public.lender_directory ENABLE ROW LEVEL SECURITY;
+ALTER TABLE throulyscout.lender_directory ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Lender directory is publicly readable"
-  ON public.lender_directory FOR SELECT
+  ON throulyscout.lender_directory FOR SELECT
   TO public USING (true);
 
 -- Connection Requests table
-CREATE TABLE public.connection_requests (
+CREATE TABLE throulyscout.connection_requests (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  from_user_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
-  to_agent_id uuid REFERENCES public.agent_directory(id) ON DELETE CASCADE,
-  to_lender_id uuid REFERENCES public.lender_directory(id) ON DELETE CASCADE,
+  from_user_id uuid REFERENCES throulyscout.profiles(id) ON DELETE SET NULL,
+  to_agent_id uuid REFERENCES throulyscout.agent_directory(id) ON DELETE CASCADE,
+  to_lender_id uuid REFERENCES throulyscout.lender_directory(id) ON DELETE CASCADE,
   message text NOT NULL DEFAULT '',
   contact_shared boolean NOT NULL DEFAULT false,
   from_name text,
@@ -71,28 +73,28 @@ CREATE TABLE public.connection_requests (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-ALTER TABLE public.connection_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE throulyscout.connection_requests ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Anyone can create connection requests"
-  ON public.connection_requests FOR INSERT
+  ON throulyscout.connection_requests FOR INSERT
   TO public WITH CHECK (true);
 
 CREATE POLICY "Users can read own connection requests"
-  ON public.connection_requests FOR SELECT
+  ON throulyscout.connection_requests FOR SELECT
   TO authenticated USING (from_user_id = auth.uid());
 
 -- Saved Searches table
-CREATE TABLE public.saved_searches (
+CREATE TABLE throulyscout.saved_searches (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  user_id uuid REFERENCES throulyscout.profiles(id) ON DELETE CASCADE NOT NULL,
   search_name text NOT NULL DEFAULT 'Property Search',
   filters jsonb NOT NULL DEFAULT '{}',
   state text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-ALTER TABLE public.saved_searches ENABLE ROW LEVEL SECURITY;
+ALTER TABLE throulyscout.saved_searches ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can CRUD own saved searches"
-  ON public.saved_searches FOR ALL
+  ON throulyscout.saved_searches FOR ALL
   TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());

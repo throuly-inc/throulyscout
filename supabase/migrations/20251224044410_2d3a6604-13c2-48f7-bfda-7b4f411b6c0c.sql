@@ -1,5 +1,7 @@
+set search_path = throulyscout, public, extensions;
+
 -- Create table for storing property analyses
-CREATE TABLE public.property_analyses (
+CREATE TABLE throulyscout.property_analyses (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL,
   listing_url TEXT NOT NULL,
@@ -31,31 +33,31 @@ CREATE TABLE public.property_analyses (
 );
 
 -- Enable Row Level Security
-ALTER TABLE public.property_analyses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE throulyscout.property_analyses ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies
 CREATE POLICY "Users can view own property analyses" 
-ON public.property_analyses 
+ON throulyscout.property_analyses 
 FOR SELECT 
 USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert own property analyses" 
-ON public.property_analyses 
+ON throulyscout.property_analyses 
 FOR INSERT 
 WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can update own property analyses" 
-ON public.property_analyses 
+ON throulyscout.property_analyses 
 FOR UPDATE 
 USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete own property analyses" 
-ON public.property_analyses 
+ON throulyscout.property_analyses 
 FOR DELETE 
 USING (auth.uid() = user_id);
 
 -- Create trigger for automatic timestamp updates
 CREATE TRIGGER update_property_analyses_updated_at
-BEFORE UPDATE ON public.property_analyses
+BEFORE UPDATE ON throulyscout.property_analyses
 FOR EACH ROW
-EXECUTE FUNCTION public.update_updated_at_column();
+EXECUTE FUNCTION throulyscout.update_updated_at_column();

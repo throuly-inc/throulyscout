@@ -11,6 +11,10 @@ Production: [throulyscout.com](https://throulyscout.com) (`throuly.com` redirect
 - **Services:** Google Gemini (AI features), Resend (email), Stripe (payments), Firecrawl (listing scraping), Google Maps (address autocomplete)
 - **Hosting:** Netlify (config in `netlify.toml`)
 
+### Schema layout
+
+Everything lives in a dedicated **`throulyscout` Postgres schema**, not `public`, and all edge functions are named **`throulyscout-*`**. This is because the production Supabase project is shared with the main Throuly app (schema `throuly`, functions `throuly-*`); each app is namespaced by schema, function prefix, and storage bucket prefix (`throulyscout-avatars`, etc.). The frontend client and every edge function are configured with `db: { schema: 'throulyscout' }`, and the schema must be exposed to PostgREST (see setup below).
+
 ## Prerequisites
 
 - Node.js 22+ and npm
@@ -37,7 +41,9 @@ supabase link --project-ref <YOUR_PROJECT_REF>
 supabase db push
 ```
 
-This runs every migration in `supabase/migrations/` — tables, RLS policies, triggers, and the email queue infrastructure.
+This runs every migration in `supabase/migrations/` — the `throulyscout` schema, tables, RLS policies, triggers, and the email queue infrastructure.
+
+Then expose the `throulyscout` schema to the API: in the Supabase dashboard go to Settings → Data API → **Exposed schemas** and add `throulyscout`. Without this every database call from the app fails with "schema must be one of the following".
 
 ### 3. Configure environment
 
@@ -68,7 +74,7 @@ App runs at [http://localhost:8080](http://localhost:8080). Sign up with a test 
 
 ## Edge functions
 
-The 13 functions in `supabase/functions/` handle payments, AI, third-party proxies, and the email queue. Deploy them (all or by name):
+The 12 functions in `supabase/functions/` (all prefixed `throulyscout-`) handle payments, AI, third-party proxies, and the email queue. Deploy them (all or by name):
 
 ```sh
 supabase functions deploy
@@ -78,14 +84,14 @@ Set the secrets for the features you need:
 
 | Secret | Needed for | Notes |
 | --- | --- | --- |
-| `GEMINI_API_KEY` | `chat`, `analyze-property`, `analyze-address`, `get-assistance-programs` | [Google AI Studio](https://aistudio.google.com/); free tier available |
-| `RESEND_API_KEY` | `process-email-queue` | [Resend](https://resend.com/); free tier available |
-| `EMAIL_FROM` | `process-email-queue` | Optional override, e.g. `Throuly <no-reply@throuly.com>`; must be on a Resend-verified domain |
-| `ENVIRONMENT` | `process-email-queue` | Set to `production` on the production project only. Anywhere else (including unset), email subjects get a `[STAGING]` prefix |
-| `STRIPE_SECRET_KEY` | `create-checkout`, `customer-portal`, `check-subscription` | Use `sk_test_...` outside production |
-| `FIRECRAWL_API_KEY` | `analyze-property`, `analyze-address`, `parse-property-listing` | Optional; analyzers fall back to AI estimates without it |
-| `GOOGLE_MAPS_API_KEY` | `places-autocomplete` | |
-| `TURNSTILE_SECRET_KEY` | `waitlist-signup` | Optional; captcha is skipped when unset |
+| `GEMINI_API_KEY` | chat, analyze-property, analyze-address, get-assistance-programs | [Google AI Studio](https://aistudio.google.com/); free tier available |
+| `RESEND_API_KEY` | process-email-queue | [Resend](https://resend.com/); free tier available |
+| `EMAIL_FROM` | process-email-queue | Optional override, e.g. `Throuly <no-reply@throuly.com>`; must be on a Resend-verified domain |
+| `ENVIRONMENT` | process-email-queue | Set to `production` on the production project only. Anywhere else (including unset), email subjects get a `[STAGING]` prefix |
+| `STRIPE_SECRET_KEY` | create-checkout, customer-portal, check-subscription | Use `sk_test_...` outside production |
+| `FIRECRAWL_API_KEY` | analyze-property, analyze-address, parse-property-listing | Optional; analyzers fall back to AI estimates without it |
+| `GOOGLE_MAPS_API_KEY` | places-autocomplete | |
+| `TURNSTILE_SECRET_KEY` | waitlist-signup | Optional; captcha is skipped when unset |
 
 ```sh
 supabase secrets set GEMINI_API_KEY=... RESEND_API_KEY=...
@@ -95,7 +101,14 @@ supabase secrets set GEMINI_API_KEY=... RESEND_API_KEY=...
 
 ### Email queue
 
-Emails are queued in Postgres (pgmq) and sent by `process-email-queue`. Automatic processing requires two one-time manual steps on the Supabase project (a vault secret and a `pg_cron` job) — see the notes at the bottom of `supabase/migrations/20260620001715_email_infra.sql`. Local/dev environments can skip this; nothing else depends on it.
+Emails are queued in Postgres (pgmq) and sent by `throulyscout-process-email-queue`. The dispatch machinery (wake triggers + a self-managing `pg_cron` job, see `supabase/migrations/20260803210000_email_queue_dispatch_wake.sql`) is created by the migrations, but it reads two environment-specific vault secrets that must be set once per project (SQL editor):
+
+```sql
+select vault.create_secret('https://<YOUR_PROJECT_REF>.supabase.co/functions/v1', 'edge_functions_url');
+select vault.create_secret('<your service role key>', 'email_queue_service_role_key');
+```
+
+Local/dev environments can skip this; nothing else depends on it.
 
 ## Testing
 
