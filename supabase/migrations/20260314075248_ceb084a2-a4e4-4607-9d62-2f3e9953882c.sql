@@ -1,3 +1,5 @@
+set search_path = throulyscout, public, extensions;
+
 
 -- FIX 1: Drop ALL existing RLS policies on profiles
 DROP POLICY IF EXISTS "Users can read own profile" ON profiles;
@@ -66,7 +68,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = throulyscout;
 
 CREATE TRIGGER check_privilege_escalation BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION prevent_privilege_escalation();
 

@@ -1,5 +1,7 @@
+set search_path = throulyscout, public, extensions;
+
 CREATE POLICY "Users can update own scenarios"
-  ON public.saved_scenarios
+  ON throulyscout.saved_scenarios
   FOR UPDATE
   TO authenticated
   USING (user_id = auth.uid())

@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
-  console.log(`[CUSTOMER-PORTAL] ${step}${detailsStr}`);
+  console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
 serve(async (req) => {
@@ -26,7 +26,7 @@ serve(async (req) => {
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
+      { auth: { persistSession: false }, db: { schema: "throulyscout" } }
     );
 
     const authHeader = req.headers.get("Authorization");
@@ -44,32 +44,66 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     if (customers.data.length === 0) {
-      throw new Error("No Stripe customer found for this user");
+      logStep("No customer found");
+      return new Response(JSON.stringify({ 
+        subscribed: false,
+        purchases: []
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     }
 
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
-    const ALLOWED_ORIGINS = new Set([
-      "https://throulyscout.com",
-      "https://www.throulyscout.com",
-      "https://throuly.com",
-      "https://www.throuly.com",
-      "https://throulyscout-staging.netlify.app",
-      "https://throulyscout.netlify.app",
-    ]);
-    const requestOrigin = req.headers.get("origin") ?? "";
-    const origin = ALLOWED_ORIGINS.has(requestOrigin)
-      ? requestOrigin
-      : "https://throulyscout.com";
-    const portalSession = await stripe.billingPortal.sessions.create({
+    // Check for active subscriptions
+    const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      return_url: `${origin}/pricing`,
+      status: "active",
+      limit: 10,
     });
     
-    logStep("Portal session created", { sessionId: portalSession.id });
+    const hasActiveSub = subscriptions.data.length > 0;
+    let productId = null;
+    let subscriptionEnd = null;
+    let subscriptionStatus = null;
 
-    return new Response(JSON.stringify({ url: portalSession.url }), {
+    if (hasActiveSub) {
+      const subscription = subscriptions.data[0];
+      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+      productId = subscription.items.data[0].price.product;
+      subscriptionStatus = subscription.status;
+      logStep("Active subscription found", { subscriptionId: subscription.id, productId });
+    }
+
+    // Check for one-time purchases (completed checkout sessions)
+    const sessions = await stripe.checkout.sessions.list({
+      customer: customerId,
+      limit: 100,
+    });
+
+    const completedPurchases = sessions.data
+      .filter((s: any) => s.payment_status === "paid" && s.mode === "payment")
+      .map((s: any) => ({
+        id: s.id,
+        created: s.created,
+        amount_total: s.amount_total,
+      }));
+
+    logStep("Returning subscription status", { 
+      subscribed: hasActiveSub, 
+      productId, 
+      purchaseCount: completedPurchases.length 
+    });
+
+    return new Response(JSON.stringify({
+      subscribed: hasActiveSub,
+      product_id: productId,
+      subscription_end: subscriptionEnd,
+      subscription_status: subscriptionStatus,
+      purchases: completedPurchases,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

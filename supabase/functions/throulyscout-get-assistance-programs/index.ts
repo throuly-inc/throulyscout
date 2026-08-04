@@ -27,7 +27,7 @@ serve(async (req) => {
     const sb = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } } },
+      { global: { headers: { Authorization: authHeader } }, db: { schema: "throulyscout" } },
     );
     const { data: userData, error: userErr } = await sb.auth.getUser(authHeader.replace("Bearer ", ""));
     if (userErr || !userData.user) {

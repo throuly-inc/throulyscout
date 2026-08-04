@@ -1,6 +1,8 @@
+set search_path = throulyscout, public, extensions;
+
 -- Allow clients to insert timeline entries for their deals
 CREATE POLICY "Clients can write timeline for own deals"
-ON public.timeline_entries
+ON throulyscout.timeline_entries
 FOR INSERT
 TO public
 WITH CHECK (

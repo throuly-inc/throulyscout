@@ -1,14 +1,16 @@
+set search_path = throulyscout, public, extensions;
+
 
 -- FIX 2: Drop unprotected views and recreate safe ones
 
 -- Drop all potentially unsafe views
-DROP VIEW IF EXISTS public.seller_listings_safe;
-DROP VIEW IF EXISTS public.public_listings;
-DROP VIEW IF EXISTS public.property_listings;
-DROP VIEW IF EXISTS public.public_property_listings;
+DROP VIEW IF EXISTS throulyscout.seller_listings_safe;
+DROP VIEW IF EXISTS throulyscout.public_listings;
+DROP VIEW IF EXISTS throulyscout.property_listings;
+DROP VIEW IF EXISTS throulyscout.public_property_listings;
 
 -- Create safe property listings view (no owner_id, no profile joins)
-CREATE OR REPLACE VIEW public.public_property_listings
+CREATE OR REPLACE VIEW throulyscout.public_property_listings
 WITH (security_invoker = true) AS
 SELECT
   p.id, p.city, p.state, p.zip, p.asking_price,

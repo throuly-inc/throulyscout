@@ -1,3 +1,5 @@
+set search_path = throulyscout, public, extensions;
+
 -- The 2026-07-16 workspace-system cleanup migration dropped
 -- require_active_workspace() with CASCADE, which silently deleted the RLS
 -- policies on these tables (they depended on that function). RLS stayed

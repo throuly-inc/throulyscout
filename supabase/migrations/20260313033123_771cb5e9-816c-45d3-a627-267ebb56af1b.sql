@@ -1,8 +1,10 @@
+set search_path = throulyscout, public, extensions;
+
 
 -- Create buyer_questionnaires table
-CREATE TABLE public.buyer_questionnaires (
+CREATE TABLE throulyscout.buyer_questionnaires (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES throulyscout.profiles(id) ON DELETE CASCADE,
   budget_min NUMERIC,
   budget_max NUMERIC,
   preferred_states TEXT[] DEFAULT '{}',
@@ -16,26 +18,26 @@ CREATE TABLE public.buyer_questionnaires (
 );
 
 -- Enable RLS
-ALTER TABLE public.buyer_questionnaires ENABLE ROW LEVEL SECURITY;
+ALTER TABLE throulyscout.buyer_questionnaires ENABLE ROW LEVEL SECURITY;
 
 -- RLS policies
 CREATE POLICY "Users can read own questionnaire"
-  ON public.buyer_questionnaires FOR SELECT
+  ON throulyscout.buyer_questionnaires FOR SELECT
   TO authenticated
   USING (user_id = auth.uid());
 
 CREATE POLICY "Users can insert own questionnaire"
-  ON public.buyer_questionnaires FOR INSERT
+  ON throulyscout.buyer_questionnaires FOR INSERT
   TO authenticated
   WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "Users can update own questionnaire"
-  ON public.buyer_questionnaires FOR UPDATE
+  ON throulyscout.buyer_questionnaires FOR UPDATE
   TO authenticated
   USING (user_id = auth.uid());
 
 -- Updated_at trigger
 CREATE TRIGGER update_buyer_questionnaires_updated_at
-  BEFORE UPDATE ON public.buyer_questionnaires
+  BEFORE UPDATE ON throulyscout.buyer_questionnaires
   FOR EACH ROW
-  EXECUTE FUNCTION public.update_updated_at_column();
+  EXECUTE FUNCTION throulyscout.update_updated_at_column();

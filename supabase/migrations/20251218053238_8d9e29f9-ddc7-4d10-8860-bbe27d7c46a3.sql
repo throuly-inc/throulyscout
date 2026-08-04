@@ -1,5 +1,7 @@
+set search_path = throulyscout, public, extensions;
+
 -- Create deals table for transaction tracking
-CREATE TABLE public.deals (
+CREATE TABLE throulyscout.deals (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   agent_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   client_id UUID,
@@ -22,7 +24,7 @@ CREATE TABLE public.deals (
 );
 
 -- Create clients table for buyer/seller management
-CREATE TABLE public.clients (
+CREATE TABLE throulyscout.clients (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   agent_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -41,9 +43,9 @@ CREATE TABLE public.clients (
 );
 
 -- Create offers table for tracking all offers on deals
-CREATE TABLE public.offers (
+CREATE TABLE throulyscout.offers (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
-  deal_id UUID NOT NULL REFERENCES public.deals(id) ON DELETE CASCADE,
+  deal_id UUID NOT NULL REFERENCES throulyscout.deals(id) ON DELETE CASCADE,
   offer_amount NUMERIC NOT NULL,
   status TEXT NOT NULL DEFAULT 'submitted' CHECK (status IN ('submitted', 'countered', 'accepted', 'declined', 'withdrawn')),
   contingencies TEXT[],
@@ -55,9 +57,9 @@ CREATE TABLE public.offers (
 );
 
 -- Create deal_timeline table for tracking deal progress
-CREATE TABLE public.deal_timeline (
+CREATE TABLE throulyscout.deal_timeline (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
-  deal_id UUID NOT NULL REFERENCES public.deals(id) ON DELETE CASCADE,
+  deal_id UUID NOT NULL REFERENCES throulyscout.deals(id) ON DELETE CASCADE,
   event_type TEXT NOT NULL,
   title TEXT NOT NULL,
   description TEXT,
@@ -67,76 +69,76 @@ CREATE TABLE public.deal_timeline (
 );
 
 -- Enable RLS on all tables
-ALTER TABLE public.deals ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.offers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.deal_timeline ENABLE ROW LEVEL SECURITY;
+ALTER TABLE throulyscout.deals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE throulyscout.clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE throulyscout.offers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE throulyscout.deal_timeline ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for deals
-CREATE POLICY "Agents can view own deals" ON public.deals
+CREATE POLICY "Agents can view own deals" ON throulyscout.deals
   FOR SELECT USING (auth.uid() = agent_id);
 
-CREATE POLICY "Agents can create own deals" ON public.deals
+CREATE POLICY "Agents can create own deals" ON throulyscout.deals
   FOR INSERT WITH CHECK (auth.uid() = agent_id);
 
-CREATE POLICY "Agents can update own deals" ON public.deals
+CREATE POLICY "Agents can update own deals" ON throulyscout.deals
   FOR UPDATE USING (auth.uid() = agent_id);
 
-CREATE POLICY "Agents can delete own deals" ON public.deals
+CREATE POLICY "Agents can delete own deals" ON throulyscout.deals
   FOR DELETE USING (auth.uid() = agent_id);
 
 -- RLS Policies for clients
-CREATE POLICY "Agents can view own clients" ON public.clients
+CREATE POLICY "Agents can view own clients" ON throulyscout.clients
   FOR SELECT USING (auth.uid() = agent_id);
 
-CREATE POLICY "Agents can create own clients" ON public.clients
+CREATE POLICY "Agents can create own clients" ON throulyscout.clients
   FOR INSERT WITH CHECK (auth.uid() = agent_id);
 
-CREATE POLICY "Agents can update own clients" ON public.clients
+CREATE POLICY "Agents can update own clients" ON throulyscout.clients
   FOR UPDATE USING (auth.uid() = agent_id);
 
-CREATE POLICY "Agents can delete own clients" ON public.clients
+CREATE POLICY "Agents can delete own clients" ON throulyscout.clients
   FOR DELETE USING (auth.uid() = agent_id);
 
 -- RLS Policies for offers
-CREATE POLICY "Users can view offers for their deals" ON public.offers
+CREATE POLICY "Users can view offers for their deals" ON throulyscout.offers
   FOR SELECT USING (
-    EXISTS (SELECT 1 FROM public.deals WHERE deals.id = offers.deal_id AND deals.agent_id = auth.uid())
+    EXISTS (SELECT 1 FROM throulyscout.deals WHERE deals.id = offers.deal_id AND deals.agent_id = auth.uid())
   );
 
-CREATE POLICY "Users can create offers for their deals" ON public.offers
+CREATE POLICY "Users can create offers for their deals" ON throulyscout.offers
   FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM public.deals WHERE deals.id = offers.deal_id AND deals.agent_id = auth.uid())
+    EXISTS (SELECT 1 FROM throulyscout.deals WHERE deals.id = offers.deal_id AND deals.agent_id = auth.uid())
   );
 
-CREATE POLICY "Users can update offers for their deals" ON public.offers
+CREATE POLICY "Users can update offers for their deals" ON throulyscout.offers
   FOR UPDATE USING (
-    EXISTS (SELECT 1 FROM public.deals WHERE deals.id = offers.deal_id AND deals.agent_id = auth.uid())
+    EXISTS (SELECT 1 FROM throulyscout.deals WHERE deals.id = offers.deal_id AND deals.agent_id = auth.uid())
   );
 
 -- RLS Policies for deal_timeline
-CREATE POLICY "Users can view timeline for their deals" ON public.deal_timeline
+CREATE POLICY "Users can view timeline for their deals" ON throulyscout.deal_timeline
   FOR SELECT USING (
-    EXISTS (SELECT 1 FROM public.deals WHERE deals.id = deal_timeline.deal_id AND deals.agent_id = auth.uid())
+    EXISTS (SELECT 1 FROM throulyscout.deals WHERE deals.id = deal_timeline.deal_id AND deals.agent_id = auth.uid())
   );
 
-CREATE POLICY "Users can create timeline events for their deals" ON public.deal_timeline
+CREATE POLICY "Users can create timeline events for their deals" ON throulyscout.deal_timeline
   FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM public.deals WHERE deals.id = deal_timeline.deal_id AND deals.agent_id = auth.uid())
+    EXISTS (SELECT 1 FROM throulyscout.deals WHERE deals.id = deal_timeline.deal_id AND deals.agent_id = auth.uid())
   );
 
 -- Create updated_at triggers
 CREATE TRIGGER update_deals_updated_at
-  BEFORE UPDATE ON public.deals
+  BEFORE UPDATE ON throulyscout.deals
   FOR EACH ROW
-  EXECUTE FUNCTION public.update_updated_at_column();
+  EXECUTE FUNCTION throulyscout.update_updated_at_column();
 
 CREATE TRIGGER update_clients_updated_at
-  BEFORE UPDATE ON public.clients
+  BEFORE UPDATE ON throulyscout.clients
   FOR EACH ROW
-  EXECUTE FUNCTION public.update_updated_at_column();
+  EXECUTE FUNCTION throulyscout.update_updated_at_column();
 
 CREATE TRIGGER update_offers_updated_at
-  BEFORE UPDATE ON public.offers
+  BEFORE UPDATE ON throulyscout.offers
   FOR EACH ROW
-  EXECUTE FUNCTION public.update_updated_at_column();
+  EXECUTE FUNCTION throulyscout.update_updated_at_column();

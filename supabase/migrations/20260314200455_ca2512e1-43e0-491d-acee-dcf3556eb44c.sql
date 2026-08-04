@@ -1,3 +1,5 @@
+set search_path = throulyscout, public, extensions;
+
 
 -- Drop the broad matched-buyers RLS policy (it was already dropped in prior migration, ensure clean state)
 DROP POLICY IF EXISTS "Matched buyers can read matched listings" ON seller_match_listings;
@@ -5,7 +7,7 @@ DROP POLICY IF EXISTS "Matched buyers can read matched listings" ON seller_match
 -- Re-add a restricted matched-buyers policy via RLS (row-level only; sensitive fields still on table but only owners see their own rows)
 -- Matched buyers get read access but sensitive fields (min_acceptable_price, motivation) are exposed.
 -- To truly protect those, create a safe view for matched buyers.
-CREATE OR REPLACE VIEW public.seller_listings_safe AS
+CREATE OR REPLACE VIEW throulyscout.seller_listings_safe AS
 SELECT 
   id, user_id, bedrooms, bathrooms, sqft, lot_sqft, year_built, 
   hoa_monthly, listing_price, price_negotiable,

@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
     )
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey)
+  const supabase = createClient(supabaseUrl, supabaseServiceKey, { db: { schema: 'throulyscout' } })
 
   // 1. Check rate-limit cooldown and read queue config
   const { data: state } = await supabase

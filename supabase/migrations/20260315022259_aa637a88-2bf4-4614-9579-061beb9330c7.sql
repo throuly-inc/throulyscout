@@ -1,10 +1,12 @@
+set search_path = throulyscout, public, extensions;
+
 
 -- Fix mutable search_path on block_privilege_changes
-CREATE OR REPLACE FUNCTION public.block_privilege_changes()
+CREATE OR REPLACE FUNCTION throulyscout.block_privilege_changes()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public'
+SET search_path TO 'throulyscout'
 AS $function$
 BEGIN
   IF NEW.role IS DISTINCT FROM OLD.role THEN

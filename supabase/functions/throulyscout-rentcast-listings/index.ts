@@ -63,6 +63,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { db: { schema: "throulyscout" } },
     );
     const { data: u, error: ue } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
     if (ue || !u.user) {
