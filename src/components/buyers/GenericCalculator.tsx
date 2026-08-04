@@ -596,7 +596,9 @@ export function GenericCalculator({
                 >
                   <Star className="w-5 h-5 text-accent mb-2" />
                   <p className="font-medium">Yes, first time</p>
-                  <p className="text-xs text-muted-foreground">May qualify for special programs</p>
+                  <p className="text-xs text-muted-foreground">
+                    Counts if you haven't owned a home in the last 3 years — may qualify for special programs
+                  </p>
                 </button>
                 <button
                   type="button"
@@ -616,8 +618,10 @@ export function GenericCalculator({
                   )}
                 >
                   <Home className="w-5 h-5 text-muted-foreground mb-2" />
-                  <p className="font-medium">No, I've owned before</p>
-                  <p className="text-xs text-muted-foreground">Standard programs available</p>
+                  <p className="font-medium">No, I've owned recently</p>
+                  <p className="text-xs text-muted-foreground">
+                    Owned a home in the last 3 years — standard programs available
+                  </p>
                 </button>
 
               </div>

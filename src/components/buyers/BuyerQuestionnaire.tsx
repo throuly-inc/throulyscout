@@ -27,8 +27,8 @@ const questions: Question[] = [
     id: "isFirstTimeBuyer",
     question: "Are you a first-time home buyer?",
     options: [
-      { value: "true", label: "Yes, this is my first time buying" },
-      { value: "false", label: "No, I've purchased before" },
+      { value: "true", label: "Yes — or I haven't owned a home in the last 3 years" },
+      { value: "false", label: "No — I've owned a home within the last 3 years" },
     ],
   },
   {
